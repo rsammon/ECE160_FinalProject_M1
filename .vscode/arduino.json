@@ -1,5 +1,4 @@
 {
     "board": "energia:msp432:MSP-EXP432P401R",
-    "port": "COM11",
-    "sketch": "test_files\\RSLK_Bump_Switch_Motors\\RSLK_Bump_Switch_Motors.ino"
+    "port": "COM11"
 }

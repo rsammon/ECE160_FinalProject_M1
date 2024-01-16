@@ -1,2 +1,2 @@
 # ECE160_FinalProject_M1
- Template code for the RLSK robot to complete milestone 1
+Code of Team Theta/Octopi for the ECE160 Final Group Project

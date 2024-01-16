@@ -1,5 +1,5 @@
 # ECE160_FinalProject_M1
-Code of Team Theta/Octopi for the ECE160 Final Group Project. Main code is found [here](MultifileTemplate/MultifileTemplate.ino)
+Code of Team Theta/Octopi for the ECE160 Final Group Project. Main code is found [here](MultifileTemplate/MultifileTemplate.ino).
 
 ## Circuit wiring for code:
 * **PS2 controller wireless reciever**

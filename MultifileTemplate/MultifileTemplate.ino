@@ -25,7 +25,8 @@
 // Load libraries used
 #include "SimpleRSLK.h"
 #include <Servo.h>
-#include "PS2X_lib.h"
+#include <PS2X_lib.h>
+#include "MotorFunctions.h"
 
 // Define pin numbers for the button on the PlayStation controller
 #define PS2_DAT 14  //P1.7 <-> brown wire

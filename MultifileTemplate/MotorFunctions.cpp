@@ -8,14 +8,23 @@
   Functions:
   1. void moveForward()
      - Activates the motor to move forward.
+     void moveForward(int speed)
+     -Activates the motor to move forward at a speed of the parameter
 
   2. void stopMotor()
      - Stops the motor.
 
-  Created by: Your Name
-  Date: Current Date
+  Created by: Rowan Sammon
+  Created: 01/16/2024
+  Last modified: 01/16/2024
   Version: 1.0
-*/
+*/ 
+
+#include <SimpleRSLK.h>
+#include "MotorFunctions.h"
+
+//parameters of the file
+int fastSpeed = 255;
 
 /* Moves robot forward: both motors forward same speed */
 void forward() {
@@ -23,6 +32,12 @@ void forward() {
     setMotorDirection(LEFT_MOTOR, MOTOR_DIR_FORWARD);
     setMotorDirection(RIGHT_MOTOR, MOTOR_DIR_FORWARD);
     setMotorSpeed(BOTH_MOTORS, fastSpeed);
+}
+void forward(int speed) {
+    enableMotor(BOTH_MOTORS);
+    setMotorDirection(LEFT_MOTOR, MOTOR_DIR_FORWARD);
+    setMotorDirection(RIGHT_MOTOR, MOTOR_DIR_FORWARD);
+    setMotorSpeed(BOTH_MOTORS, speed);
 }
 
 /* Stops robot forward: both motors disabled */

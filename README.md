@@ -1,7 +1,7 @@
 # ECE160_FinalProject_M1
-Code of Team Theta/Octopi for the ECE160 Final Group Project
+Code of Team Theta/Octopi for the ECE160 Final Group Project. <!--Main code is found [here](PLACE_LINK_HERE) -->
 
-##Circuit wiring for code:
+## Circuit wiring for code:
 * **PS2 controller wireless reciever**
     - Power (red):         3.3V
     - ground (black):      GND

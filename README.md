@@ -2,6 +2,7 @@
 Code of Team Theta/Octopi for the ECE160 Final Group Project. Main code is found [here](MultifileTemplate/MultifileTemplate.ino)
 
 ## Circuit wiring for code:
+pin wiring of the internal circuitry: [here](https://moodle.rose-hulman.edu/pluginfile.php/5035015/mod_resource/content/2/msp432p4xx_1pg_pin_map.pdf)
 * **PS2 controller wireless reciever**
 ```
     - power (red):         3.3V (bus)

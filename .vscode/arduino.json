@@ -1,5 +1,0 @@
-{
-    "board": "energia:msp432:MSP-EXP432P401R",
-    "port": "COM11",
-    "sketch": "test_files\\testMotorFunctions\\testMotorFunctions.ino"
-}

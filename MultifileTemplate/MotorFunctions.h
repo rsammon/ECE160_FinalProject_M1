@@ -11,4 +11,10 @@ Initialize any functions & variables that exist in MotorFunction.cpp here.
 
 void forward();
 void forward(int speed);
+void backward();
+void backward(int speed);
 void stop();
+void spinLeft();
+void spinLeft(int speed);
+void spinRight();
+void spinRight(int speed);

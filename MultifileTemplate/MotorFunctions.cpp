@@ -24,23 +24,71 @@
 #include "MotorFunctions.h"
 
 //parameters of the file
-int fastSpeed = 255;
+int fastSpeed = 75;
 
 /* Moves robot forward: both motors forward same speed */
+//defaults to speed of 75%
 void forward() {
-    enableMotor(BOTH_MOTORS);
-    setMotorDirection(LEFT_MOTOR, MOTOR_DIR_FORWARD);
-    setMotorDirection(RIGHT_MOTOR, MOTOR_DIR_FORWARD);
+   enableMotor(BOTH_MOTORS);
+    setMotorDirection(BOTH_MOTORS, MOTOR_DIR_FORWARD);
     setMotorSpeed(BOTH_MOTORS, fastSpeed);
 }
+
+//moves robot forward: both motors forward same speed
+//@param int speed: the speed from 0%-100% to go forward at
 void forward(int speed) {
     enableMotor(BOTH_MOTORS);
-    setMotorDirection(LEFT_MOTOR, MOTOR_DIR_FORWARD);
-    setMotorDirection(RIGHT_MOTOR, MOTOR_DIR_FORWARD);
+    setMotorDirection(BOTH_MOTORS, MOTOR_DIR_FORWARD);
+    setMotorSpeed(BOTH_MOTORS, speed);
+}
+
+/* Moves robot forward: both motors forward same speed */
+//defaults to speed of 75%
+void backward() {
+   enableMotor(BOTH_MOTORS);
+    setMotorDirection(BOTH_MOTORS, MOTOR_DIR_BACKWARD);
+    setMotorSpeed(BOTH_MOTORS, fastSpeed);
+}
+
+//moves robot forward: both motors forward same speed
+//@param int speed: the speed from 0%-100% to go forward at
+void backward(int speed) {
+    enableMotor(BOTH_MOTORS);
+    setMotorDirection(BOTH_MOTORS, MOTOR_DIR_BACKWARD);
     setMotorSpeed(BOTH_MOTORS, speed);
 }
 
 /* Stops robot forward: both motors disabled */
 void stop() {
     disableMotor(BOTH_MOTORS);
+}
+
+/*spins robot to the left by turning both motors in opposite directions*/
+void spinLeft(){
+    enableMotor(BOTH_MOTORS);
+    setMotorDirection(LEFT_MOTOR, MOTOR_DIR_BACKWARD);
+    setMotorDirection(RIGHT_MOTOR, MOTOR_DIR_FORWARD);
+    setMotorSpeed(BOTH_MOTORS, fastSpeed);
+}
+//@param int speed: the speed from 0%-100% to turn at
+void spinLeft(int speed){
+    enableMotor(BOTH_MOTORS);
+    setMotorDirection(LEFT_MOTOR, MOTOR_DIR_BACKWARD);
+    setMotorDirection(RIGHT_MOTOR, MOTOR_DIR_FORWARD);
+    setMotorSpeed(BOTH_MOTORS, speed);
+}
+
+/*spins robot to the right by turning both motors in opposite directions*/
+void spinRight(){
+    enableMotor(BOTH_MOTORS);
+    setMotorDirection(LEFT_MOTOR, MOTOR_DIR_FORWARD);
+    setMotorDirection(RIGHT_MOTOR, MOTOR_DIR_BACKWARD);
+    setMotorSpeed(BOTH_MOTORS, fastSpeed);
+}
+//@param int speed: the speed from 0%-100% to turn at
+void spinRight(int speed){
+    enableMotor(BOTH_MOTORS);
+    setMotorDirection(LEFT_MOTOR, MOTOR_DIR_FORWARD);
+    setMotorDirection(RIGHT_MOTOR, MOTOR_DIR_BACKWARD);
+    setMotorSpeed(BOTH_MOTORS, speed);
 }

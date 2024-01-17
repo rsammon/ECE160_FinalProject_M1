@@ -11,19 +11,32 @@ properly, you need to either put the MotorFunctions.cpp & MotorFunctions.h in
  the same directory/folder as this file.
  - Rowan Sammon
  */
+#include <SimpleRSLK.h>
 #include "MotorFunctions.h"
 
+
+int k = 1000;
 long timeStarted;
+long timeSinceStart;
 void setup(){
+    setupRSLK();
     timeStarted=millis();
 }
 
 void loop(){
-    if(millis()-timeStarted<1000){
-        forward();
+    timeSinceStart = millis()-timeStarted;
+
+    if(timeSinceStart<k){
+        forward(25);
     }
-     if(millis()-timeStarted<2000 && millis()-timeStarted>1000){
-        forward(100);
+    else if(timeSinceStart<2*k){
+        backward(25);
+    } 
+    else if(timeSinceStart<3*k){
+        spinLeft(25);
     }
-    stop();
+    else if(timeSinceStart<4*k){
+        spinRight(25);
+    }
+    else if(timeSinceStart%k==0) stop();
 }

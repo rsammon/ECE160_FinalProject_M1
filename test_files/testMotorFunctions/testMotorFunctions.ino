@@ -1,7 +1,7 @@
 /*
 Author: Rowan Sammon
 Created: 1/16/2024
-Last modified: 01/16/2024
+Last modified: 01/17/2024
 purpose: verify proper functions of the MotorFunctions.cpp methods
 */
 
@@ -37,6 +37,14 @@ void loop(){
     }
     else if(timeSinceStart<4*k){
         spinRight(25);
+    } else if(timeSinceStart<5*k){
+        moveRL(50, 50);
+    } else if(timeSinceStart<6*k){
+        moveRL(-50, -50);
+    } else if(timeSinceStart<7*k){
+        moveRL(50, 0);
+    } else if(timeSinceStart<8*k){
+        moveRL(-50, 50);
     }
     else if(timeSinceStart%k==0) stop();
 }

@@ -18,3 +18,4 @@ void spinLeft();
 void spinLeft(int speed);
 void spinRight();
 void spinRight(int speed);
+void moveRL(int speedLeft, int speedRight);

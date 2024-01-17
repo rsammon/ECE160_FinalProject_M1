@@ -16,7 +16,7 @@
 
   Created by: Rowan Sammon
   Created: 01/16/2024
-  Last modified: 01/16/2024
+  Last modified: 01/17/2024
   Version: 1.0
 */ 
 
@@ -91,4 +91,33 @@ void spinRight(int speed){
     setMotorDirection(LEFT_MOTOR, MOTOR_DIR_FORWARD);
     setMotorDirection(RIGHT_MOTOR, MOTOR_DIR_BACKWARD);
     setMotorSpeed(BOTH_MOTORS, speed);
+}
+
+/*moves the robot forward at the specified right and left speeds*/
+//@param leftSpeed: the speed from -100 to 100 percent (negative is backward, positive is forward) to move the left motor
+//@param rightSpeed: the speed from -100 to 100 percent (negative is backward, positive is forward) to move the right motor
+void moveRL(int leftSpeed, int rightSpeed){
+    //parameter validity checks
+    if(leftSpeed > 100) leftSpeed = 100;
+    if(leftSpeed < -100) leftSpeed = -100;
+    if(rightSpeed > 100) rightSpeed = 100;
+    if(rightSpeed < -100) rightSpeed = -100;
+
+    enableMotor(BOTH_MOTORS);
+
+    //left motor set
+    int leftMotorDirection;
+    if(leftSpeed >= 0) leftMotorDirection = MOTOR_DIR_FORWARD;
+    else leftMotorDirection = MOTOR_DIR_BACKWARD;
+
+    setMotorDirection(LEFT_MOTOR, leftMotorDirection);
+    setMotorSpeed(LEFT_MOTOR, abs(leftSpeed));
+
+    //right motor set
+    int rightMotorDirection;
+    if(rightSpeed >= 0) rightMotorDirection = MOTOR_DIR_FORWARD;
+    else rightMotorDirection = MOTOR_DIR_BACKWARD;
+
+    setMotorDirection(RIGHT_MOTOR, rightMotorDirection);
+    setMotorSpeed(RIGHT_MOTOR, abs(rightSpeed));
 }

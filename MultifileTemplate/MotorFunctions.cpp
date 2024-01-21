@@ -22,6 +22,7 @@
 
 #include <SimpleRSLK.h>
 #include "MotorFunctions.h"
+#include <Servo.h>
 
 //parameters of the file
 int fastSpeed = 75;

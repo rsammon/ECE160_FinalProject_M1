@@ -122,10 +122,10 @@ void moveRL(int leftSpeed, int rightSpeed){
     setMotorDirection(RIGHT_MOTOR, rightMotorDirection);
     setMotorSpeed(RIGHT_MOTOR, abs(rightSpeed));
 }
-//@param int initialPos: starting position, should be 100 or 0.
+//@param int initialPos: starting position, should be 120 or 0.
 void useGripper(int initialPos){
     if (pos == 0){
-      pos = 100;
+      pos = 120;
       myservo.write(pos); 
     }
     else {

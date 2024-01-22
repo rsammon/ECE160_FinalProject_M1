@@ -50,6 +50,13 @@ RemoteMode CurrentRemoteMode = PLAYSTATION;
 const uint16_t lowSpeed = 15;
 const uint16_t fastSpeed = 30;
 
+//Declare variables
+int leftStickValue;
+int rightStickValue;
+int leftSpeed;
+int rightSpeed;
+const int TOP_SPEED = 75; 
+
 void setup() {
   Serial.begin(57600);
   Serial.print("Starting up Robot code...... ");
@@ -99,7 +106,7 @@ void loop() {
     RemoteControlPlaystation();
 
   } else if (CurrentRemoteMode == 1) {
-    // put code here to run using the IR controller if neccessary
+    RemoteControlIR();
   }
 }
 
@@ -107,11 +114,10 @@ void loop() {
   /* RemoteControlPlaystation() function
   This function uses a playstation controller and the PLSK libraray with
   an RLSK robot using to implement remote controller. 
-  
-  A few actions are programed for an example. 
-
+ 
   Button control map:
-  PAD UP button moves both motors forward
+  Left joystick controls left wheel speed
+  Right joystick controls right wheel speed
   CROSS button stops motors
   */
   void RemoteControlPlaystation() {
@@ -120,11 +126,29 @@ void loop() {
     // Example of receive and decode remote control command
     // the forward() and stop() functions should be independent of
     // the control methods
-    if (ps2x.Button(PSB_PAD_UP)) {
-      Serial.println("PAD UP button pushed ");
-      forward();
-    } else if (ps2x.Button(PSB_CROSS)) {
-      Serial.println("CROSS button pushed");
-      stop();
+    leftStickValue = ps2x.Analog(PSS_LY);
+    rightStickValue = ps2x.Analog(PSS_RY);
+    leftSpeed = map(leftStickValue, 0, 255, -TOP_SPEED,TOP_SPEED);
+    rightSpeed = map(rightStickValue, 0, 255, -TOP_SPEED,TOP_SPEED);
+
+    if (leftSpeed>5||rightSpeed>5) {
+      moveRL(leftSpeed, rightSpeed);
     }
+    if (ps2x.Button(PSB_CIRCLE)) {
+      Serial.println("CIRCLE button pushed");
+      
+    }
+    delay(50);
+  }
+
+
+ /* RemoteControlIR() function
+  This function uses an IR controller with
+  an RLSK robot to implement the remote controller. 
+ 
+  Button control map:
+ 
+  */
+  void RemoteControlIR(){
+
   }

@@ -22,7 +22,6 @@
 
 #include <SimpleRSLK.h>
 #include "MotorFunctions.h"
-#include <Servo.h>
 
 //parameters of the file
 int fastSpeed = 75;
@@ -121,15 +120,23 @@ void moveRL(int leftSpeed, int rightSpeed){
 
     setMotorDirection(RIGHT_MOTOR, rightMotorDirection);
     setMotorSpeed(RIGHT_MOTOR, abs(rightSpeed));
+
 }
+
+
+
 //@param int initialPos: starting position, should be 120 or 0.
-void useGripper(int initialPos){
-    if (pos == 0){
-      pos = 120;
-      myservo.write(pos); 
-    }
-    else {
-      pos = 0;
-      myservo.write(pos); 
-    }
+int useGripper(int initialPos, Servo myServo){
+  int pos;
+  if (initialPos == 0){
+    pos = 80;
+    myServo.write(pos); 
+  }
+  else {
+    pos = 0;
+    myServo.write(pos); 
+  }
+  return pos;
 }
+
+

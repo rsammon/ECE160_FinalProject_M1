@@ -1,17 +1,15 @@
-/*A multifile project code template
-  A template for the Milestone 1 project code that uses multiple files
-  for modularity. The compiler first loads the principal file 
-  (the one with the same name as the folder) and then loads 
-  the others in alphabetical order. Variables defined in an 
-  earlier file will be visible to code in a file that is loaded 
-  later, but not vice-versa. 
+/*
+  Final project code for ECE 160
+  Based on multifile template
+  Program can use a playstation controller or IR remoter to direct a robot
 
   Calls functions in files:
   MotorFunctions.ino
+  MotorFunctions.cpp
 
   written for the MSP432401 board
-  Author: Deborah Walter
-  Last revised: 11/28/2023
+  Author: Deborah Walter, Rowan Sammon, Wyatt Ronn, and Eric Steuber
+  Last revised: 1/23/24
 
 ***** Hardware Connections: *****
      start button       P3.0
@@ -27,6 +25,16 @@
 #include <Servo.h>
 #include <PS2X_lib.h>
 #include "MotorFunctions.h"
+#include <TinyIRremote.h>
+
+
+//IR Setup
+#define STR_HELPER(x) #x
+#define STR(x) STR_HELPER(x)
+#define IR_RCV_PIN      33
+IRreceiver irRX(IR_RCV_PIN);
+IRData IRresults;
+
 
 // Define pin numbers for the button on the PlayStation controller
 #define PS2_DAT 14  //P1.7 <-> brown wire
@@ -37,6 +45,11 @@
 // Create an instance of the playstation controller object
 PS2X ps2x;
 
+//New servo object
+Servo myServo;
+const int SERVO_PIN = 38;
+
+
 // Define remote mode either playstation controller or IR remote controller
 enum RemoteMode {
   PLAYSTATION,
@@ -44,18 +57,23 @@ enum RemoteMode {
 };
 
 // Declare and initialize the current state variable
-RemoteMode CurrentRemoteMode = PLAYSTATION;
+RemoteMode CurrentRemoteMode = IR_REMOTE;
 
 // Tuning Parameters
 const uint16_t lowSpeed = 15;
-const uint16_t fastSpeed = 30;
+const uint16_t midSpeed = 30;
+const uint16_t highSpeed = 70;
 
 //Declare variables
 int leftStickValue;
 int rightStickValue;
 int leftSpeed;
 int rightSpeed;
-const int TOP_SPEED = 75; 
+int topSpeed = 30; 
+int gripperPos = 0;
+unsigned long currentTime;
+unsigned long previousTime;
+const int INTERVAL = 300;
 
 void setup() {
   Serial.begin(57600);
@@ -63,6 +81,8 @@ void setup() {
 
   // Run setup code
   setupRSLK();
+  myServo.attach(SERVO_PIN);
+
 
   if (CurrentRemoteMode == 0) {
     // using the playstation controller
@@ -92,7 +112,22 @@ void setup() {
       delayMicroseconds(1000 * 1000);
     }
   } else if (CurrentRemoteMode == 1) {
-    // put start-up code for IR controller here if neccessary
+    Serial.begin(57600);
+    delay(500); // To be able to connect Serial monitor after reset or power up 
+    Serial.println(F("START " __FILE__ " from " __DATE__));
+    /*
+     * Must be called to initialize and set up IR receiver pin.
+     *  bool initIRReceiver(bool includeRepeats = true, bool enableCallback = false,
+                void (*callbackFunction)(uint16_t , uint8_t , bool) = NULL)
+     */
+    if (irRX.initIRReceiver()) {
+        Serial.println(F("Ready to receive NEC IR signals at pin " STR(IR_RCV_PIN)));
+    } else {
+        Serial.println("Initialization of IR receiver failed!");
+        while (1) {;}
+    }
+    // enable receive feedback and specify LED pin number (defaults to LED_BUILTIN)
+    enableRXLEDFeedback(BLUE_LED);
   }
 }
 
@@ -100,12 +135,13 @@ void loop() {
   // Read input from PlayStation controller
   ps2x.read_gamepad();
 
-  // Operate the robot in remote control mode
+   // Operate the robot in remote control mode
   if (CurrentRemoteMode == 0) {
     Serial.println("Running remote control with the Playstation Controller");
     RemoteControlPlaystation();
 
   } else if (CurrentRemoteMode == 1) {
+    Serial.println("Running remote control with the IR Remote");
     RemoteControlIR();
   }
 }
@@ -118,7 +154,9 @@ void loop() {
   Button control map:
   Left joystick controls left wheel speed
   Right joystick controls right wheel speed
-  CROSS button stops motors
+  Circle button opens/closes gripper
+  First bumper buttons enable slow mode
+  Second bumper buttons enable fast mode
   */
   void RemoteControlPlaystation() {
     // put your code here to run in remote control mode
@@ -126,19 +164,40 @@ void loop() {
     // Example of receive and decode remote control command
     // the forward() and stop() functions should be independent of
     // the control methods
+    currentTime = millis();
+    //Speed setitngs
+    if(ps2x.Button(PSB_L2)&&ps2x.Button(PSB_R2)){
+      topSpeed = highSpeed;
+    }
+    else if(ps2x.Button(PSB_L1)&&ps2x.Button(PSB_R1)) {
+      topSpeed = lowSpeed;
+    }
+    else {
+      topSpeed = midSpeed;
+    }
     leftStickValue = ps2x.Analog(PSS_LY);
     rightStickValue = ps2x.Analog(PSS_RY);
-    leftSpeed = map(leftStickValue, 0, 255, -TOP_SPEED,TOP_SPEED);
-    rightSpeed = map(rightStickValue, 0, 255, -TOP_SPEED,TOP_SPEED);
+    leftSpeed = -(leftStickValue - 127)*topSpeed/128;
+    rightSpeed =  -(rightStickValue - 127)*topSpeed/128;
+    Serial.print("leftSpeed: ");//Debugging help
+    Serial.print(leftSpeed);
+    Serial.print(" | rightSpeed: ");
+    Serial.print(rightSpeed);
+    Serial.print(" | leftStick: ");
+    Serial.print(leftStickValue);
+    Serial.print(" | rightStick: ");
+    Serial.print(rightStickValue);
+    moveRL(leftSpeed, rightSpeed);//Movement function
 
-    if (leftSpeed>5||rightSpeed>5) {
-      moveRL(leftSpeed, rightSpeed);
+    //Gripper functionality
+    if(currentTime-previousTime>=INTERVAL){
+      if (ps2x.Button(PSB_CIRCLE)) {
+        Serial.println("CIRCLE button pushed");
+        gripperPos = useGripper(gripperPos, myServo);
+        previousTime = currentTime;
+        //This timer ensures the gripper only detects one button push at a time
+      }
     }
-    if (ps2x.Button(PSB_CIRCLE)) {
-      Serial.println("CIRCLE button pushed");
-      
-    }
-    delay(50);
   }
 
 
@@ -147,8 +206,50 @@ void loop() {
   an RLSK robot to implement the remote controller. 
  
   Button control map:
- 
+  Vol+ = forward
+  Vol- = backward
+  Play/Pause = Stop
+  Skip back = spin left
+  Skip forward = spin right
+  Channel down = turn left
+  Channel up = turn right
+  0 = close gripper
+  1 = open gripper
   */
   void RemoteControlIR(){
-
+    irRX.decodeIR(&IRresults);
+    currentTime = millis();
+    int command = IRresults.command;
+    Serial.print(command);
+    switch (command) {
+      case 68:
+        moveRL(-15, 15);
+        break;
+      case 67:
+        moveRL(15, -15);
+        break;
+      case 70:
+        moveRL(30, 30);
+        break;
+      case 21:
+        moveRL(-20, -20);
+        break;
+      case 64:
+        moveRL(0, 0);
+        break;
+      case 7:
+        moveRL(20, 10);
+        break;
+      case 9:
+        moveRL(10, 20);
+        break;
+      case 22:
+        //Gripper functionality
+        useGripper(0, myServo);
+        break;
+      case 12:
+        useGripper(80, myServo);
+        break;
+    }
   }
+  

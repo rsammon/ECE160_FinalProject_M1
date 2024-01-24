@@ -159,6 +159,8 @@ void loop() {
   Circle button opens/closes gripper
   First bumper buttons enable slow mode
   Second bumper buttons enable fast mode
+  Up on D-pad transmits the gold candle IR signal
+  Down on the D-pad recieves an IR signal and sends it back
   */
   void RemoteControlPlaystation() {
     // put your code here to run in remote control mode
@@ -205,7 +207,7 @@ void loop() {
     if(ps2x.Button(PSB_PAD_UP)){
       //send command
       Serial.print('.');
-      delay(1000);
+      delay(200);
     }
     if(ps2x.Button(PSB_PAD_DOWN)){
       //recieve IR signal on address and retransmit it
@@ -213,12 +215,12 @@ void loop() {
       int command = IRresults.command;
       //send command
       Serial.print('.');
-      delay(1000);
+      delay(200);
     }
   }
 
 
- /* RemoteControlIR() function
+  /* RemoteControlIR() function
   This function uses an IR controller with
   an RLSK robot to implement the remote controller. 
  
@@ -270,3 +272,24 @@ void loop() {
     }
   }
   
+  /*
+  AutonomousMode() function
+  This function runs when the robot is switch to auto mode.
+  It has 3 states: tunnel, line follow, and drop payload.
+    - The tunnel state moves the robot through the dark tunnel.
+    - The line follow state makes the robot find the line and follow it.
+    - The drop payload state makes the robot drop the marigold within the zone and idle until the user takes control.
+  */
+  void AutonomousMode(){
+    switch (condition) {
+      case: AutoState == TUNNEL
+        //Eric, insert tunnel code here
+        break;
+      case: AutoState == LINE_FOLLOW
+        //Rowan, insert line follow code here
+        break;
+      case: AutoState == DROP_PAYLOAD
+        //insert code to drop marigold in drop zone
+        break;
+    }
+  }

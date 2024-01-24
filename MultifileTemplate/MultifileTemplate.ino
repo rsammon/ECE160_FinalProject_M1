@@ -26,6 +26,7 @@
 #include <PS2X_lib.h>
 #include "MotorFunctions.h"
 #include <TinyIRremote.h>
+#include <TinyNEC.h>
 
 
 //IR Setup
@@ -44,6 +45,7 @@ IRData IRresults;
 
 // Create an instance of the playstation controller object
 PS2X ps2x;
+
 
 //New servo object
 Servo myServo;
@@ -197,6 +199,21 @@ void loop() {
         previousTime = currentTime;
         //This timer ensures the gripper only detects one button push at a time
       }
+    }
+
+    //IR transmitter
+    if(ps2x.Button(PSB_PAD_UP)){
+      //send command
+      Serial.print('.');
+      delay(1000);
+    }
+    if(ps2x.Button(PSB_PAD_DOWN)){
+      //recieve IR signal on address and retransmit it
+      irRX.decodeIR(&IRresults);
+      int command = IRresults.command;
+      //send command
+      Serial.print('.');
+      delay(1000);
     }
   }
 

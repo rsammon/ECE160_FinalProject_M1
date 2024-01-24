@@ -4,7 +4,7 @@
  * PS2 Controller example from the PS2_Lib 
  * 2021-10-08: Refactored for MSP432P401R ZJE
  *             -Changed pins to good defaults for use with RSLK 
- *             -changed all delay() to delayMicroseconds
+ *             -changed all delay() to delayMicrosecondss
  *
  * Original code: https://github.com/madsci1016/Arduino-PS2X
  * Documentation: http://www.billporter.info/2010/06/05/playstation-2-controller-arduino-library-v1-0/

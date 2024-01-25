@@ -7,7 +7,7 @@
   The computer must be paired with the device for this program to work.
 
   Hardware Connections:
-    - VCC                  5V   (bus)
+    - VCC:                 5V   (bus)
     - GND:                 GND  (bus)
     - RXD:                 P3.3 - 4 (TXD1)
     - TXD:                 P3.2 - 3 (RXD1)

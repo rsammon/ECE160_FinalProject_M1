@@ -35,6 +35,15 @@
 #define IR_RCV_PIN      33
 IRreceiver irRX(IR_RCV_PIN);
 IRData IRresults;
+IRData IRmsg;
+
+int IRLEDpin = 46;
+
+
+int AutoState = 0;
+const int TUNNEL = 0;
+const int LINE_FOLLOW = 1;
+const int DROP_PAYLOAD = 2;
 
 
 // Define pin numbers for the button on the PlayStation controller
@@ -59,7 +68,7 @@ enum RemoteMode {
 };
 
 // Declare and initialize the current state variable
-RemoteMode CurrentRemoteMode = IR_REMOTE;
+RemoteMode CurrentRemoteMode = PLAYSTATION;
 
 // Tuning Parameters
 const uint16_t lowSpeed = 15;
@@ -84,6 +93,7 @@ void setup() {
   // Run setup code
   setupRSLK();
   myServo.attach(SERVO_PIN);
+  pinMode(IRLEDpin, OUTPUT);
 
 
   if (CurrentRemoteMode == 0) {
@@ -130,6 +140,8 @@ void setup() {
     }
     // enable receive feedback and specify LED pin number (defaults to LED_BUILTIN)
     enableRXLEDFeedback(BLUE_LED);
+    IRmsg.protocol = NEC;
+    
   }
 }
 
@@ -206,11 +218,19 @@ void loop() {
     //IR transmitter
     if(ps2x.Button(PSB_PAD_UP)){
       //send command
-      Serial.print('.');
-      delay(200);
+      Serial.print(" | Transmitting...");
+      digitalWrite(IRLEDpin, HIGH);
+      digitalWrite(LED_BUILTIN, HIGH);
+      // sendIR.write(&IRmsg);
+      
+    }
+    else{
+      digitalWrite(IRLEDpin, LOW);
+      digitalWrite(LED_BUILTIN, LOW);
     }
     if(ps2x.Button(PSB_PAD_DOWN)){
       //recieve IR signal on address and retransmit it
+      Serial.println("Recieving and retransmitting...");
       irRX.decodeIR(&IRresults);
       int command = IRresults.command;
       //send command
@@ -281,14 +301,14 @@ void loop() {
     - The drop payload state makes the robot drop the marigold within the zone and idle until the user takes control.
   */
   void AutonomousMode(){
-    switch (condition) {
-      case: AutoState == TUNNEL
+    switch (AutoState) {
+      case TUNNEL:
         //Eric, insert tunnel code here
         break;
-      case: AutoState == LINE_FOLLOW
+      case LINE_FOLLOW:
         //Rowan, insert line follow code here
         break;
-      case: AutoState == DROP_PAYLOAD
+      case DROP_PAYLOAD:
         //insert code to drop marigold in drop zone
         break;
     }

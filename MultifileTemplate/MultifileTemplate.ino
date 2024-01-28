@@ -309,7 +309,8 @@ void loop() {
         //Rowan, insert line follow code here
         break;
       case DROP_PAYLOAD:
-        //insert code to drop marigold in drop zone
+        stop();
+        useGripper(0, myServo);
         break;
     }
   }

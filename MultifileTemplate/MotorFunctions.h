@@ -20,5 +20,4 @@ void spinLeft(int speed);
 void spinRight();
 void spinRight(int speed);
 void moveRL(int speedLeft, int speedRight);
-void moveRL(int speedLeft, int speedRight);
 int useGripper(int initialPos, Servo myServo);

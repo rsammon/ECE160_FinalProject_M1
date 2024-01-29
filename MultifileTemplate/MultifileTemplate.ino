@@ -27,6 +27,7 @@
 #include "MotorFunctions.h"
 #include <TinyIRremote.h>
 #include <TinyNEC.h>
+#include "LineFollowFunctions.h"
 
 
 //IR Setup
@@ -44,6 +45,10 @@ int AutoState = 0;
 const int TUNNEL = 0;
 const int LINE_FOLLOW = 1;
 const int DROP_PAYLOAD = 2;
+
+//states
+#define PS_STATE 0
+#define IR_STATE 1
 
 
 // Define pin numbers for the button on the PlayStation controller
@@ -88,7 +93,9 @@ const int INTERVAL = 300;
 
 void setup() {
   Serial.begin(57600);
+  Serial1.begin(57600);
   Serial.print("Starting up Robot code...... ");
+  Serial1.print("Starting up Robot code...... ");
 
   // Run setup code
   setupRSLK();
@@ -150,11 +157,11 @@ void loop() {
   ps2x.read_gamepad();
 
    // Operate the robot in remote control mode
-  if (CurrentRemoteMode == 0) {
+  if (CurrentRemoteMode == PS_STATE) {
     Serial.println("Running remote control with the Playstation Controller");
     RemoteControlPlaystation();
 
-  } else if (CurrentRemoteMode == 1) {
+  } else if (CurrentRemoteMode == IR_STATE) {
     Serial.println("Running remote control with the IR Remote");
     RemoteControlIR();
   }

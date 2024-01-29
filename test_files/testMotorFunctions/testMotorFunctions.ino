@@ -1,7 +1,7 @@
 /*
 Author: Rowan Sammon
 Created: 1/16/2024
-Last modified: 01/17/2024
+Last modified: 01/28/2024
 purpose: verify proper functions of the MotorFunctions.cpp methods
 */
 

@@ -39,9 +39,11 @@ IRData IRresults;
 IRData IRmsg;
 
 int IRLEDpin = 46;
+IRsender irTX = IRsender(IRLEDpin);
 int SensorPos = 1;
 int lightSensor = A2;
 
+//Initialize Autonomous States
 int AutoState = 0;
 const int START_IN_TUNNEL = 0;
 const int LINE_FOLLOW = 1;
@@ -51,6 +53,7 @@ const int EXIT_TUNNEL = 4;
 const int LEAVE_TUNNEL = 5;
 const int IDLE = 6;
 
+//Initialize AutoOrManual States
 const int MANUAL = 1;
 const int AUTO = 0;
 int AutoOrManual = MANUAL;
@@ -161,6 +164,10 @@ void setup() {
     // enable receive feedback and specify LED pin number (defaults to LED_BUILTIN)
     enableRXLEDFeedback(BLUE_LED);
     IRmsg.protocol = NEC;
+    IRmsg.address = 0xEE;
+    IRmsg.command = 160;
+    IRmsg.isRepeat = false;
+    irTX.initIRSender();
     delay(500);
     
   }
@@ -264,6 +271,7 @@ void loop() {
         }
       }
 
+      //Display light sensor output for debugging
       if(ps2x.Button(PSB_SQUARE)){
         Serial.print("Light: ");
         Serial.print(analogRead(lightSensor));
@@ -271,26 +279,25 @@ void loop() {
 
       //IR transmitter
       if(ps2x.Button(PSB_PAD_UP)){
-        //send command
         Serial.print(" | Transmitting...");
         digitalWrite(IRLEDpin, HIGH);
         digitalWrite(LED_BUILTIN, HIGH);
-        // sendIR.write(&IRmsg);
+        irTX.write(&IRmsg);
         
+      }
+      else if(ps2x.Button(PSB_PAD_DOWN)){
+        //recieve IR signal on address and retransmit it
+        Serial.println("Recieving and retransmitting...");
+        irRX.decodeIR(&IRresults);
+        irTX.write(&IRresults);
+        Serial.print('.');
+        delay(200);
       }
       else{
         digitalWrite(IRLEDpin, LOW);
         digitalWrite(LED_BUILTIN, LOW);
       }
-      if(ps2x.Button(PSB_PAD_DOWN)){
-        //recieve IR signal on address and retransmit it
-        Serial.println("Recieving and retransmitting...");
-        irRX.decodeIR(&IRresults);
-        int command = IRresults.command;
-        //send command
-        Serial.print('.');
-        delay(200);
-      }
+
 }
 
 

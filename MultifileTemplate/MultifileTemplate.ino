@@ -92,6 +92,8 @@ int gripperPos = 0;
 unsigned long currentTime;
 unsigned long previousTime;
 const int INTERVAL = 300;
+double distIN;
+int AutoOrManual=0;
 
 void setup() {
   Serial.begin(57600);
@@ -150,6 +152,7 @@ void setup() {
     // enable receive feedback and specify LED pin number (defaults to LED_BUILTIN)
     enableRXLEDFeedback(BLUE_LED);
     IRmsg.protocol = NEC;
+    delay(500);
     
   }
 
@@ -193,63 +196,82 @@ void loop() {
     // the forward() and stop() functions should be independent of
     // the control methods
     currentTime = millis();
-    //Speed setitngs
-    if(ps2x.Button(PSB_L2)&&ps2x.Button(PSB_R2)){
-      topSpeed = highSpeed;
-    }
-    else if(ps2x.Button(PSB_L1)&&ps2x.Button(PSB_R1)) {
-      topSpeed = lowSpeed;
-    }
-    else {
-      topSpeed = midSpeed;
-    }
-    leftStickValue = ps2x.Analog(PSS_LY);
-    rightStickValue = ps2x.Analog(PSS_RY);
-    leftSpeed = -(leftStickValue - 127)*topSpeed/128;
-    rightSpeed =  -(rightStickValue - 127)*topSpeed/128;
-    Serial.print("leftSpeed: ");//Debugging help
-    Serial.print(leftSpeed);
-    Serial.print(" | rightSpeed: ");
-    Serial.print(rightSpeed);
-    Serial.print(" | leftStick: ");
-    Serial.print(leftStickValue);
-    Serial.print(" | rightStick: ");
-    Serial.print(rightStickValue);
-    moveRL(leftSpeed, rightSpeed);//Movement function
-
-    //Gripper functionality
-    if(currentTime-previousTime>=INTERVAL){
-      if (ps2x.Button(PSB_CIRCLE)) {
-        Serial.println("CIRCLE button pushed");
-        gripperPos = useGripper(gripperPos, myServo);
-        previousTime = currentTime;
-        //This timer ensures the gripper only detects one button push at a time
-      }
-    }
-
-    //IR transmitter
-    if(ps2x.Button(PSB_PAD_UP)){
-      //send command
-      Serial.print(" | Transmitting...");
-      digitalWrite(IRLEDpin, HIGH);
-      digitalWrite(LED_BUILTIN, HIGH);
-      // sendIR.write(&IRmsg);
-      
-    }
-    else{
-      digitalWrite(IRLEDpin, LOW);
-      digitalWrite(LED_BUILTIN, LOW);
-    }
-    if(ps2x.Button(PSB_PAD_DOWN)){
-      //recieve IR signal on address and retransmit it
-      Serial.println("Recieving and retransmitting...");
-      irRX.decodeIR(&IRresults);
-      int command = IRresults.command;
-      //send command
-      Serial.print('.');
-      delay(200);
+    switch (AutoOrManual) {
+      case 1:
+        AutonomousMode();
+        if(ps2x.Button(PSB_SELECT)){
+          AutoOrManual=0;
+        }
+        break;
+      case 0:
+        ManualMode();
+        if(ps2x.Button(PSB_SELECT)){
+          AutoOrManual=1;
+        }
+        break;
     }
   }
+  void ManualMode(){
+      //Speed settings
+      if(ps2x.Button(PSB_L2)&&ps2x.Button(PSB_R2)){
+        topSpeed = highSpeed;
+      }
+      else if(ps2x.Button(PSB_L1)&&ps2x.Button(PSB_R1)) {
+        topSpeed = lowSpeed;
+      }
+      else {
+        topSpeed = midSpeed;
+      }
+      leftStickValue = ps2x.Analog(PSS_LY);
+      rightStickValue = ps2x.Analog(PSS_RY);
+      leftSpeed = -(leftStickValue - 127)*topSpeed/128;
+      rightSpeed =  -(rightStickValue - 127)*topSpeed/128;
+      Serial.print("leftSpeed: ");//Debugging help
+      Serial.print(leftSpeed);
+      Serial.print(" | rightSpeed: ");
+      Serial.print(rightSpeed);
+      Serial.print(" | leftStick: ");
+      Serial.print(leftStickValue);
+      Serial.print(" | rightStick: ");
+      Serial.print(rightStickValue);
+      moveRL(leftSpeed, rightSpeed);//Movement function
+
+      //Gripper functionality
+      if(currentTime-previousTime>=INTERVAL){
+        if (ps2x.Button(PSB_CIRCLE)) {
+          Serial.println("CIRCLE button pushed");
+          gripperPos = useGripper(gripperPos, myServo);
+          previousTime = currentTime;
+          //This timer ensures the gripper only detects one button push at a time
+        }
+      }
+
+      //IR transmitter
+      if(ps2x.Button(PSB_PAD_UP)){
+        //send command
+        Serial.print(" | Transmitting...");
+        digitalWrite(IRLEDpin, HIGH);
+        digitalWrite(LED_BUILTIN, HIGH);
+        // sendIR.write(&IRmsg);
+        
+      }
+      else{
+        digitalWrite(IRLEDpin, LOW);
+        digitalWrite(LED_BUILTIN, LOW);
+      }
+      if(ps2x.Button(PSB_PAD_DOWN)){
+        //recieve IR signal on address and retransmit it
+        Serial.println("Recieving and retransmitting...");
+        irRX.decodeIR(&IRresults);
+        int command = IRresults.command;
+        //send command
+        Serial.print('.');
+        delay(200);
+      }
+}
+
+
+
 
 
   /* RemoteControlIR() function
@@ -313,23 +335,28 @@ void loop() {
     - The drop payload state makes the robot drop the marigold within the zone and idle until the user takes control.
   */
   void AutonomousMode(){
+    Serial.print("In Auto Mode: ");
     distIN = readSharpDistIN(SensorPos);
     switch (AutoState) {
-      case TUNNEL:
+      case START_IN_TUNNEL:
+        Serial.print("In starting tunnel state. Distance: ");
+        Serial.println(distIN);
         moveRL(30, 30);
         if (distIN<7){
           AutoState = TURN_IN_TUNNEL;
         }
         break;
       case TURN_IN_TUNNEL:
+        Serial.print("In turning tunnel state. Distance: ");
+        Serial.println(distIN);
         moveRL(30, -30);
-        if (distIN>70){
+        if (distIN>30){
           AutoState = EXIT_TUNNEL;
         }
         break;
       case EXIT_TUNNEL:
         moveRL(30,30);
-        if (analogRead(lightSensor)>100){
+        if (ps2x.Button(PSB_PAD_RIGHT)){//add lightsensor
           AutoState = LINE_FOLLOW;
         }
         break;

@@ -39,7 +39,7 @@ IRData IRresults;
 IRData IRmsg;
 
 int IRLEDpin = 46;
-
+int SensorPos = 1;
 
 int AutoState = 0;
 const int TUNNEL = 0;
@@ -310,7 +310,15 @@ void loop() {
   void AutonomousMode(){
     switch (AutoState) {
       case TUNNEL:
-        //Eric, insert tunnel code here
+        moveRL(30, 30);
+        distIN = readSharpDistIN(SensorPos);
+        if (distIN<7){
+          AutoState == TURN_IN_TUNNEL;
+        }
+        break;
+      case TURN_IN_TUNNEL:
+        moveRL(30, -30);
+        if (distIN>)
         break;
       case LINE_FOLLOW:
         //Rowan, insert line follow code here

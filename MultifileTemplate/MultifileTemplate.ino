@@ -32,6 +32,7 @@
 #include "MotorFunctions.h"
 #include <TinyIRremote.h>
 #include <TinyNEC.h>
+#include "TinyNECTX.h"
 #include "LineFollowFunctions.h"
 
 
@@ -43,7 +44,7 @@ IRreceiver irRX(IR_RCV_PIN);
 IRData IRresults;
 IRData IRmsg;
 
-int IRLEDpin = 46;
+int IRLEDpin = 36;
 IRsender irTX = IRsender(IRLEDpin);
 int SensorPos = 1;
 int lightSensor = A2;
@@ -120,7 +121,6 @@ void setup() {
   // Run setup code
   setupRSLK();
   myServo.attach(SERVO_PIN);
-  pinMode(IRLEDpin, OUTPUT);
   pinMode(lightSensor, INPUT);
 
 
@@ -134,6 +134,19 @@ void setup() {
     bool pressures = false;
     bool rumble = false;
     int error = 1;
+
+    if(irTX.initIRSender()){
+      Serial.println("IR Transmitter initialized.");
+    }
+    else {
+     Serial.println("IR Transmitter failed to initialize.");
+    }
+    //Set IRmsg to light gold votive
+    IRmsg.protocol = NEC;
+    IRmsg.address = 0xEE;
+    IRmsg.command = 160;
+    IRmsg.isRepeat = false;
+    Serial.println("Setup complete.");
 
     while (error) {
       error = ps2x.config_gamepad(PS2_CLK, PS2_CMD, PS2_SEL, PS2_DAT, pressures, rumble);
@@ -151,7 +164,8 @@ void setup() {
         Serial.println("Controller refusing to enter Pressures mode, may not support it. ");
       delayMicroseconds(1000 * 1000);
     }
-  } else if (CurrentRemoteMode == 1) {
+  } 
+  else if (CurrentRemoteMode == 1) {
     Serial.begin(57600);
     delay(500); // To be able to connect Serial monitor after reset or power up 
     Serial.println(F("START " __FILE__ " from " __DATE__));
@@ -168,12 +182,8 @@ void setup() {
     }
     // enable receive feedback and specify LED pin number (defaults to LED_BUILTIN)
     enableRXLEDFeedback(BLUE_LED);
-    IRmsg.protocol = NEC;
-    IRmsg.address = 0xEE;
-    IRmsg.command = 160;
-    IRmsg.isRepeat = false;
-    irTX.initIRSender();
-    delay(500);
+
+    
     
   }
 
@@ -187,11 +197,11 @@ void loop() {
 
    // Operate the robot in remote control mode
   if (CurrentRemoteMode == PS_STATE) {
-    Serial.print("| Running remote control with the Playstation Controller");
+    Serial1.print("| Running remote control with the Playstation Controller");
     RemoteControlPlaystation();
 
   } else if (CurrentRemoteMode == IR_STATE) {
-    Serial.println("Running remote control with the IR Remote");
+    Serial1.println("Running remote control with the IR Remote");
     RemoteControlIR();
   }
 }
@@ -243,6 +253,7 @@ void loop() {
   */
   void ManualMode(){
       //Speed settings
+      delay(10);
       if(ps2x.Button(PSB_L2)&&ps2x.Button(PSB_R2)){
         topSpeed = highSpeed;
       }
@@ -256,20 +267,20 @@ void loop() {
       rightStickValue = ps2x.Analog(PSS_RY);
       leftSpeed = -(leftStickValue - 127)*topSpeed/128;
       rightSpeed =  -(rightStickValue - 127)*topSpeed/128;
-      Serial.print("leftSpeed: ");//Debugging help
-      Serial.print(leftSpeed);
-      Serial.print(" | rightSpeed: ");
-      Serial.print(rightSpeed);
-      Serial.print(" | leftStick: ");
-      Serial.print(leftStickValue);
-      Serial.print(" | rightStick: ");
-      Serial.println(rightStickValue);
+      Serial1.print("leftSpeed: ");//Debugging help
+      Serial1.print(leftSpeed);
+      Serial1.print(" | rightSpeed: ");
+      Serial1.print(rightSpeed);
+      Serial1.print(" | leftStick: ");
+      Serial1.print(leftStickValue);
+      Serial1.print(" | rightStick: ");
+      Serial1.println(rightStickValue);
       moveRL(leftSpeed, rightSpeed);//Movement function
 
       //Gripper functionality
       if(currentTime-previousTime>=INTERVAL){
         if (ps2x.Button(PSB_CIRCLE)) {
-          Serial.println("CIRCLE button pushed");
+          Serial1.println("CIRCLE button pushed");
           gripperPos = useGripper(gripperPos, myServo);
           previousTime = currentTime;
           //This timer ensures the gripper only detects one button push at a time
@@ -278,16 +289,20 @@ void loop() {
 
       //Display light sensor output for debugging
       if(ps2x.Button(PSB_SQUARE)){
-        Serial.print("Light: ");
-        Serial.print(analogRead(lightSensor));
+        Serial1.print("Light: ");
+        Serial1.print(analogRead(lightSensor));
       }
 
       //IR transmitter
       if(ps2x.Button(PSB_PAD_UP)){
-        Serial.print(" | Transmitting...");
-        digitalWrite(IRLEDpin, HIGH);
+        
         digitalWrite(LED_BUILTIN, HIGH);
-        irTX.write(&IRmsg);
+        if(irTX.write(&IRmsg)==1){
+         Serial.print(" | Transmitting:");
+         Serial.println(IRmsg.command);
+        }
+        
+
         
       }
       else if(ps2x.Button(PSB_PAD_DOWN)){
@@ -296,7 +311,7 @@ void loop() {
         irRX.decodeIR(&IRresults);
         irTX.write(&IRresults);
         Serial.print('.');
-        delay(200);
+        delay(100);
       }
       else{
         digitalWrite(IRLEDpin, LOW);
@@ -370,26 +385,26 @@ void loop() {
     - The drop payload state makes the robot drop the marigold within the zone and idle until the user takes control.
   */
   void AutonomousMode(){
-    Serial.print("In Auto Mode. Distance: ");
+    Serial1.print("In Auto Mode. Distance: ");
     distIN = readSharpDistIN(SensorPos);
-    Serial.print(distIN);
+    Serial1.print(distIN);
     switch (AutoState) {
       case START_IN_TUNNEL:
-        Serial.println(" | In start tunnel state.");
+        Serial1.println(" | In start tunnel state.");
         moveRL(30, 30);
         if (distIN<5){
           AutoState = TURN_IN_TUNNEL;
         }
         break;
       case TURN_IN_TUNNEL:
-        Serial.println(" | In turning tunnel state.");
+        Serial1.println(" | In turning tunnel state.");
         moveRL(15, -15);
         if (distIN>20){
           AutoState = EXIT_TUNNEL;
         }
         break;
       case EXIT_TUNNEL:
-        Serial.println(" | In exit tunnel state.");
+        Serial1.println(" | In exit tunnel state.");
         moveRL(30,30);
         if (analogRead(lightSensor)>2000){
           AutoState = LEAVE_TUNNEL;
@@ -397,14 +412,14 @@ void loop() {
         }
         break;
       case LINE_FOLLOW:
-        Serial.println(" | In line follow state.");
+        Serial1.println(" | In line follow state.");
         moveForwardOnLine();
         if(distIN<10){
           AutoState = DROP_PAYLOAD;
         }
         break;
       case DROP_PAYLOAD:
-        Serial.println(" | In drop payload state.");
+        Serial1.println(" | In drop payload state.");
         stop();
         flip(180);
         useGripper(80, myServo);

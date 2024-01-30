@@ -139,6 +139,7 @@ int useGripper(int initialPos, Servo myServo){
   return pos;
 }
 
+//@param int degrees: the angle the robot should rotate
 void flip(int degrees){
   resetLeftEncoderCnt();
   resetRightEncoderCnt();

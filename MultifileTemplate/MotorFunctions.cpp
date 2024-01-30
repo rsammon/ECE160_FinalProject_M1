@@ -139,4 +139,13 @@ int useGripper(int initialPos, Servo myServo){
   return pos;
 }
 
+void flip(int degrees){
+  resetLeftEncoderCnt();
+  resetRightEncoderCnt();
+  moveRL(15, -15);
+  while (getEncoderRightCnt()<degrees*2) {
+  }
+  stop();
+}
+
 

@@ -40,6 +40,7 @@ IRData IRmsg;
 
 int IRLEDpin = 46;
 int SensorPos = 1;
+int lightSensor = A2;
 
 int AutoState = 0;
 const int START_IN_TUNNEL = 0;
@@ -47,6 +48,13 @@ const int LINE_FOLLOW = 1;
 const int DROP_PAYLOAD = 2;
 const int TURN_IN_TUNNEL = 3;
 const int EXIT_TUNNEL = 4;
+const int LEAVE_TUNNEL = 5;
+const int IDLE = 6;
+
+const int MANUAL = 1;
+const int AUTO = 0;
+int AutoOrManual = MANUAL;
+
 
 //states
 #define PS_STATE 0
@@ -93,7 +101,7 @@ unsigned long currentTime;
 unsigned long previousTime;
 const int INTERVAL = 300;
 double distIN;
-int AutoOrManual=0;
+
 
 void setup() {
   Serial.begin(57600);
@@ -105,6 +113,7 @@ void setup() {
   setupRSLK();
   myServo.attach(SERVO_PIN);
   pinMode(IRLEDpin, OUTPUT);
+  pinMode(lightSensor, INPUT);
 
 
   if (CurrentRemoteMode == 0) {
@@ -166,7 +175,7 @@ void loop() {
 
    // Operate the robot in remote control mode
   if (CurrentRemoteMode == PS_STATE) {
-    Serial.println("Running remote control with the Playstation Controller");
+    Serial.print("| Running remote control with the Playstation Controller");
     RemoteControlPlaystation();
 
   } else if (CurrentRemoteMode == IR_STATE) {
@@ -178,16 +187,10 @@ void loop() {
 
   /* RemoteControlPlaystation() function
   This function uses a playstation controller and the PLSK libraray with
-  an RLSK robot using to implement remote controller. 
- 
-  Button control map:
-  Left joystick controls left wheel speed
-  Right joystick controls right wheel speed
-  Circle button opens/closes gripper
-  First bumper buttons enable slow mode
-  Second bumper buttons enable fast mode
-  Up on D-pad transmits the gold candle IR signal
-  Down on the D-pad recieves an IR signal and sends it back
+  an RLSK robot to implement the remote controller. 
+  
+  The function has two states: manual and automatic.
+  Pressing the SELECT button switches between states.
   */
   void RemoteControlPlaystation() {
     // put your code here to run in remote control mode
@@ -197,20 +200,35 @@ void loop() {
     // the control methods
     currentTime = millis();
     switch (AutoOrManual) {
-      case 1:
+      case AUTO:
         AutonomousMode();
-        if(ps2x.Button(PSB_SELECT)){
-          AutoOrManual=0;
+        if(ps2x.Button(PSB_SELECT)&&currentTime-previousTime>INTERVAL){
+          AutoOrManual=MANUAL;
+          previousTime=currentTime;
         }
         break;
-      case 0:
+      case MANUAL:
         ManualMode();
-        if(ps2x.Button(PSB_SELECT)){
-          AutoOrManual=1;
+        if(ps2x.Button(PSB_SELECT)&&currentTime-previousTime>INTERVAL){
+          AutoOrManual=AUTO;
+          AutoState = START_IN_TUNNEL;
+          previousTime=currentTime;
         }
         break;
     }
   }
+  /*
+  ManualMode() function
+  This function is looped when in manual playstation mode.
+  Button control map:
+  Left joystick controls left wheel speed
+  Right joystick controls right wheel speed
+  Circle button opens/closes gripper
+  First bumper buttons enable slow mode
+  Second bumper buttons enable fast mode
+  Up on D-pad transmits the gold candle IR signal
+  Down on the D-pad recieves an IR signal and sends it back
+  */
   void ManualMode(){
       //Speed settings
       if(ps2x.Button(PSB_L2)&&ps2x.Button(PSB_R2)){
@@ -233,7 +251,7 @@ void loop() {
       Serial.print(" | leftStick: ");
       Serial.print(leftStickValue);
       Serial.print(" | rightStick: ");
-      Serial.print(rightStickValue);
+      Serial.println(rightStickValue);
       moveRL(leftSpeed, rightSpeed);//Movement function
 
       //Gripper functionality
@@ -244,6 +262,11 @@ void loop() {
           previousTime = currentTime;
           //This timer ensures the gripper only detects one button push at a time
         }
+      }
+
+      if(ps2x.Button(PSB_SQUARE)){
+        Serial.print("Light: ");
+        Serial.print(analogRead(lightSensor));
       }
 
       //IR transmitter
@@ -335,40 +358,54 @@ void loop() {
     - The drop payload state makes the robot drop the marigold within the zone and idle until the user takes control.
   */
   void AutonomousMode(){
-    Serial.print("In Auto Mode: ");
+    Serial.print("In Auto Mode. Distance: ");
     distIN = readSharpDistIN(SensorPos);
+    Serial.print(distIN);
     switch (AutoState) {
       case START_IN_TUNNEL:
-        Serial.print("In starting tunnel state. Distance: ");
-        Serial.println(distIN);
+        Serial.println(" | In start tunnel state.");
         moveRL(30, 30);
-        if (distIN<7){
+        if (distIN<5){
           AutoState = TURN_IN_TUNNEL;
         }
         break;
       case TURN_IN_TUNNEL:
-        Serial.print("In turning tunnel state. Distance: ");
-        Serial.println(distIN);
-        moveRL(30, -30);
-        if (distIN>30){
+        Serial.println(" | In turning tunnel state.");
+        moveRL(15, -15);
+        if (distIN>20){
           AutoState = EXIT_TUNNEL;
         }
         break;
       case EXIT_TUNNEL:
+        Serial.println(" | In exit tunnel state.");
         moveRL(30,30);
-        if (ps2x.Button(PSB_PAD_RIGHT)){//add lightsensor
-          AutoState = LINE_FOLLOW;
+        if (analogRead(lightSensor)>2000){
+          AutoState = LEAVE_TUNNEL;
+          previousTime = currentTime;
         }
         break;
       case LINE_FOLLOW:
+        Serial.println(" | In line follow state.");
         moveForwardOnLine();
         if(distIN<10){
           AutoState = DROP_PAYLOAD;
         }
         break;
       case DROP_PAYLOAD:
+        Serial.println(" | In drop payload state.");
         stop();
-        useGripper(0, myServo);
+        flip(180);
+        useGripper(80, myServo);
+        AutoState = IDLE;
         break;
+      case LEAVE_TUNNEL:
+        moveRL(15, 15);
+        if (currentTime-previousTime>INTERVAL){
+          AutoState=LINE_FOLLOW;
+        }
+        break;
+      case IDLE:
+      stop();
+      break;
     }
   }

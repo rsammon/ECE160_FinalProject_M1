@@ -1,15 +1,16 @@
 /*
   Final project code for ECE 160
   Based on multifile template
-  Program can use a playstation controller or IR remoter to direct a robot
+  Program can use a playstation controller or IR remote to direct a robot
 
   Calls functions in files:
   MotorFunctions.ino
   MotorFunctions.cpp
+  LineFollowFunctions.cpp
 
   written for the MSP432401 board
   Author: Deborah Walter, Rowan Sammon, Wyatt Ronn, and Eric Steuber
-  Last revised: 1/23/24
+  Last revised: 1/30/24
 
 ***** Hardware Connections: *****
      start button       P3.0
@@ -18,6 +19,10 @@
      orange wire        P1.6 
      yellow wire        P2.3
      blue wire          P6.7
+
+     IR LED             P
+     Light Sensor       P
+     Gripper Servo      P
 */
 
 // Load libraries used

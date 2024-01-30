@@ -150,6 +150,9 @@ void setup() {
     IRmsg.protocol = NEC;
     
   }
+
+//implement a method to allow calibration after button is pressed
+  calibrateLineFollow();
 }
 
 void loop() {
@@ -322,6 +325,7 @@ void loop() {
         break;
       case LINE_FOLLOW:
         //Rowan, insert line follow code here
+        moveForwardOnLine();
         break;
       case DROP_PAYLOAD:
         stop();

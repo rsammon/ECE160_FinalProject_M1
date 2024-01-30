@@ -42,9 +42,11 @@ int IRLEDpin = 46;
 int SensorPos = 1;
 
 int AutoState = 0;
-const int TUNNEL = 0;
+const int START_IN_TUNNEL = 0;
 const int LINE_FOLLOW = 1;
 const int DROP_PAYLOAD = 2;
+const int TURN_IN_TUNNEL = 3;
+const int EXIT_TUNNEL = 4;
 
 //states
 #define PS_STATE 0
@@ -311,21 +313,31 @@ void loop() {
     - The drop payload state makes the robot drop the marigold within the zone and idle until the user takes control.
   */
   void AutonomousMode(){
+    distIN = readSharpDistIN(SensorPos);
     switch (AutoState) {
       case TUNNEL:
         moveRL(30, 30);
-        distIN = readSharpDistIN(SensorPos);
         if (distIN<7){
-          AutoState == TURN_IN_TUNNEL;
+          AutoState = TURN_IN_TUNNEL;
         }
         break;
       case TURN_IN_TUNNEL:
         moveRL(30, -30);
-        if (distIN>)
+        if (distIN>70){
+          AutoState = EXIT_TUNNEL;
+        }
+        break;
+      case EXIT_TUNNEL:
+        moveRL(30,30);
+        if (analogRead(lightSensor)>100){
+          AutoState = LINE_FOLLOW;
+        }
         break;
       case LINE_FOLLOW:
-        //Rowan, insert line follow code here
         moveForwardOnLine();
+        if(distIN<10){
+          AutoState = DROP_PAYLOAD;
+        }
         break;
       case DROP_PAYLOAD:
         stop();

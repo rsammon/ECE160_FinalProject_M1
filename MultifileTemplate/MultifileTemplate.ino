@@ -113,9 +113,7 @@ double distIN;
 
 
 void setup() {
-  Serial.begin(57600);
   Serial1.begin(57600);
-  Serial.print("Starting up Robot code...... ");
   Serial1.print("Starting up Robot code...... ");
 
   // Run setup code
@@ -126,7 +124,7 @@ void setup() {
 
   if (CurrentRemoteMode == 0) {
     // using the playstation controller
-    Serial.println("Using playstation controller, make sure it is paired first ");
+    Serial1.println("Using playstation controller, make sure it is paired first ");
 
     // Initialize PlayStation controller
     delayMicroseconds(500 * 1000);  //added delay to give wireless ps2 module some time to startup, before configuring it
@@ -136,48 +134,48 @@ void setup() {
     int error = 1;
 
     if(irTX.initIRSender()){
-      Serial.println("IR Transmitter initialized.");
+      Serial1.println("IR Transmitter initialized.");
     }
     else {
-     Serial.println("IR Transmitter failed to initialize.");
+     Serial1.println("IR Transmitter failed to initialize.");
     }
     //Set IRmsg to light gold votive
     IRmsg.protocol = NEC;
     IRmsg.address = 0xEE;
     IRmsg.command = 160;
     IRmsg.isRepeat = false;
-    Serial.println("Setup complete.");
+    Serial1.println("Setup complete.");
 
     while (error) {
       error = ps2x.config_gamepad(PS2_CLK, PS2_CMD, PS2_SEL, PS2_DAT, pressures, rumble);
 
       if (error == 0)
-        Serial.println("Found Controller, configured successful ");
+        Serial1.println("Found Controller, configured successful ");
 
       else if (error == 1)
-        Serial.println("No controller found, check wiring, see readme.txt to enable debug. visit www.billporter.info for troubleshooting tips");
+        Serial1.println("No controller found, check wiring, see readme.txt to enable debug. visit www.billporter.info for troubleshooting tips");
 
       else if (error == 2)
-        Serial.println("Controller found but not accepting commands. see readme.txt to enable debug. Visit www.billporter.info for troubleshooting tips");
+        Serial1.println("Controller found but not accepting commands. see readme.txt to enable debug. Visit www.billporter.info for troubleshooting tips");
 
       else if (error == 3)
-        Serial.println("Controller refusing to enter Pressures mode, may not support it. ");
+        Serial1.println("Controller refusing to enter Pressures mode, may not support it. ");
       delayMicroseconds(1000 * 1000);
     }
   } 
   else if (CurrentRemoteMode == 1) {
-    Serial.begin(57600);
-    delay(500); // To be able to connect Serial monitor after reset or power up 
-    Serial.println(F("START " __FILE__ " from " __DATE__));
+    Serial1.begin(57600);
+    delay(500); // To be able to connect Serial1 monitor after reset or power up 
+    Serial1.println(F("START " __FILE__ " from " __DATE__));
     /*
      * Must be called to initialize and set up IR receiver pin.
      *  bool initIRReceiver(bool includeRepeats = true, bool enableCallback = false,
                 void (*callbackFunction)(uint16_t , uint8_t , bool) = NULL)
      */
     if (irRX.initIRReceiver()) {
-        Serial.println(F("Ready to receive NEC IR signals at pin " STR(IR_RCV_PIN)));
+        Serial1.println(F("Ready to receive NEC IR signals at pin " STR(IR_RCV_PIN)));
     } else {
-        Serial.println("Initialization of IR receiver failed!");
+        Serial1.println("Initialization of IR receiver failed!");
         while (1) {;}
     }
     // enable receive feedback and specify LED pin number (defaults to LED_BUILTIN)
@@ -187,16 +185,18 @@ void setup() {
     
   }
 
-
+while(Serial1.available() <=0);
 //implement a method to allow calibration after button is pressed
   calibrateLineFollow();
   Serial1.println("[Done] Calibration finished");
 }
 
 void loop() {
+
   // Read input from PlayStation controller
   ps2x.read_gamepad();
 
+  Serial1.println("loops");
    // Operate the robot in remote control mode
   if (CurrentRemoteMode == PS_STATE) {
     Serial1.print("| Running remote control with the Playstation Controller");
@@ -205,11 +205,6 @@ void loop() {
   } else if (CurrentRemoteMode == IR_STATE) {
     Serial1.println("Running remote control with the IR Remote");
     RemoteControlIR();
-  }
-
-  if(Serial1.available() > 0){
-    calibrateLineFollow();
-    Serial1.println("[Done] Calibration finished");
   }
 }
 
@@ -260,7 +255,7 @@ void loop() {
   */
   void ManualMode(){
       //Speed settings
-      delay(10);
+      
       if(ps2x.Button(PSB_L2)&&ps2x.Button(PSB_R2)){
         topSpeed = highSpeed;
       }
@@ -305,19 +300,18 @@ void loop() {
         
         digitalWrite(LED_BUILTIN, HIGH);
         if(irTX.write(&IRmsg)==1){
-         Serial.print(" | Transmitting:");
-         Serial.println(IRmsg.command);
+         Serial1.print(" | Transmitting:");
+         Serial1.println(IRmsg.command);
         }
-        
 
         
       }
       else if(ps2x.Button(PSB_PAD_DOWN)){
         //recieve IR signal on address and retransmit it
-        Serial.println("Recieving and retransmitting...");
+        Serial1.println("Recieving and retransmitting...");
         irRX.decodeIR(&IRresults);
         irTX.write(&IRresults);
-        Serial.print('.');
+        Serial1.print('.');
         delay(100);
       }
       else{
@@ -346,7 +340,7 @@ void loop() {
     irRX.decodeIR(&IRresults);
     currentTime = millis();
     int command = IRresults.command;
-    Serial.print(command);
+    Serial1.print(command);
     switch (command) {
       case 68:
         moveRL(-15, 15);
@@ -415,7 +409,7 @@ void loop() {
         }
         break;
       case LINE_FOLLOW:
-        Serial.println(" | In line follow state.");
+        Serial1.println(" | In line follow state.");
         moveForwardOnLine();
         Serial1.print(" Pos: ");
         Serial1.println(getLinePosition());

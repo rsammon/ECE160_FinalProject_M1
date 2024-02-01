@@ -49,7 +49,6 @@ int SensorPos = 1;
 int lightSensor = A2;
 
 //Initialize Autonomous States
-int AutoState = 0;
 const int START_IN_TUNNEL = 0;
 const int LINE_FOLLOW = 1;
 const int DROP_PAYLOAD = 2;
@@ -57,6 +56,7 @@ const int TURN_IN_TUNNEL = 3;
 const int EXIT_TUNNEL = 4;
 const int LEAVE_TUNNEL = 5;
 const int IDLE = 6;
+int AutoState = LINE_FOLLOW;
 
 //Initialize AutoOrManual States
 const int MANUAL = 1;
@@ -177,8 +177,10 @@ void setup() {
     
   }
 
+
 //implement a method to allow calibration after button is pressed
   calibrateLineFollow();
+  Serial1.println("[Done] Calibration finished");
 }
 
 void loop() {
@@ -193,6 +195,11 @@ void loop() {
   } else if (CurrentRemoteMode == IR_STATE) {
     Serial.println("Running remote control with the IR Remote");
     RemoteControlIR();
+  }
+
+  if(Serial1.available() > 0){
+    calibrateLineFollow();
+    Serial1.println("[Done] Calibration finished");
   }
 }
 
@@ -305,10 +312,6 @@ void loop() {
 
 }
 
-
-
-
-
   /* RemoteControlIR() function
   This function uses an IR controller with
   an RLSK robot to implement the remote controller. 
@@ -397,8 +400,10 @@ void loop() {
         }
         break;
       case LINE_FOLLOW:
-        Serial.println(" | In line follow state.");
+        Serial1.print(" | In line follow state.");
         moveForwardOnLine();
+        Serial1.print(" Pos: ");
+        Serial1.println(getLinePosition());
         if(distIN<10){
           AutoState = DROP_PAYLOAD;
         }

@@ -13,7 +13,7 @@
 
   Created by: Rowan Sammon
   Created: 01/16/2024
-  Last modified: 01/29/2024
+  Last modified: 02/03/2024
   Version: 1.0
 */ 
 
@@ -28,7 +28,7 @@ const uint16_t normalSpeed = 10;
 const uint16_t fastSpeed = 20;
 
 void calibrateLineFollow(){
-    calibrateLineSensor();
+    calibrateLineSensor(LIGHT_LINE);
     enableMotor(BOTH_MOTORS);
 }
 

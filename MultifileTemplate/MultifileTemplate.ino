@@ -47,7 +47,7 @@ IRData IRmsg;
 int IRLEDpin = 36;
 IRsender irTX = IRsender(IRLEDpin);
 int SensorPos = 1;
-int lightSensor = A2;
+int lightSensor = 63;
 
 //Initialize Autonomous States
 const int START_IN_TUNNEL = 0;
@@ -69,6 +69,7 @@ int AutoOrManual = MANUAL;
 #define PS_STATE 0
 #define IR_STATE 1
 
+#define START_BUTTON_PIN 9
 
 // Define pin numbers for the button on the PlayStation controller
 #define PS2_DAT 14  //P1.7 <-> brown wire
@@ -99,6 +100,8 @@ const uint16_t lowSpeed = 15;
 const uint16_t midSpeed = 30;
 const uint16_t highSpeed = 70;
 
+const int diagnosticLEDPins[4] = {5, 26, 7, 10};
+
 //Declare variables
 int leftStickValue;
 int rightStickValue;
@@ -121,6 +124,8 @@ void setup() {
   myServo.attach(SERVO_PIN);
   pinMode(lightSensor, INPUT);
 
+  pinMode(START_BUTTON_PIN, INPUT_PULLDOWN);
+  setupDiagnosticLEDs();
 
   if (CurrentRemoteMode == 0) {
     // using the playstation controller
@@ -185,10 +190,14 @@ void setup() {
     
   }
 
-while(Serial1.available() <=0);
+//while(Serial1.available() <=0);
+while(digitalRead(START_BUTTON_PIN) == LOW);
 //implement a method to allow calibration after button is pressed
   calibrateLineFollow();
   Serial1.println("[Done] Calibration finished");
+  //throw away first readings on the controller (seem to be wrong)  
+  ps2x.Analog(PSS_LY);
+  ps2x.Analog(PSS_RY);
 }
 
 void loop() {
@@ -196,7 +205,6 @@ void loop() {
   // Read input from PlayStation controller
   ps2x.read_gamepad();
 
-  Serial1.println("loops");
    // Operate the robot in remote control mode
   if (CurrentRemoteMode == PS_STATE) {
     Serial1.print("| Running remote control with the Playstation Controller");
@@ -206,8 +214,31 @@ void loop() {
     Serial1.println("Running remote control with the IR Remote");
     RemoteControlIR();
   }
+
+
+  updateDiagnosticLEDs();
 }
 
+/** Updates the diagnosticLEDPins based on the Autonomous state
+ * @param none
+ * @return void
+*/
+void updateDiagnosticLEDs(){
+  digitalWrite(diagnosticLEDPins[0], bitRead(AutoState, 0));
+  digitalWrite(diagnosticLEDPins[1], bitRead(AutoState, 1));
+  digitalWrite(diagnosticLEDPins[2], bitRead(AutoState, 2));
+  digitalWrite(diagnosticLEDPins[3], bitRead(AutoState, 3));
+}
+/**
+ * setups up the LED pins used in the diagnostics to OUTPUT
+ * @param none
+ * @returns void
+*/
+void setupDiagnosticLEDs(){
+  for(int i = 0; i < sizeof(diagnosticLEDPins)/4; i++){
+      pinMode(diagnosticLEDPins[i], OUTPUT);
+  }
+}
 
   /* RemoteControlPlaystation() function
   This function uses a playstation controller and the PLSK libraray with
@@ -312,7 +343,7 @@ void loop() {
         irRX.decodeIR(&IRresults);
         irTX.write(&IRresults);
         Serial1.print('.');
-        delay(100);
+        //delay(100);
       }
       else{
         digitalWrite(IRLEDpin, LOW);

@@ -4,17 +4,20 @@
 /*
 Author: Rowan Sammon
 Created: 1/16/2024
-Last modified: 01/29/2024
+Last modified: 02/03/2024
 purpose: verify proper functions of the LineFollowFunctions methods
 */
 
+#define START_BUTTON_PIN 9
+
 void setup(){
-    setupRSLK();    
+    setupRSLK();
+    pinMode(START_BUTTON_PIN, INPUT_PULLDOWN);
     
     Serial1.begin(57600);
-    Serial1.println("Send a message to calibrate:");
-    while(!Serial1);
-    while(Serial1.available() <= 0);
+    Serial1.println("Press the button to calibrate");
+    while(digitalRead(START_BUTTON_PIN) == LOW);
+    
     calibrateLineFollow();
     Serial1.println("[Done] Calibration finished");
 }

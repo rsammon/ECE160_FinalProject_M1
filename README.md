@@ -20,8 +20,15 @@ pin wiring of the internal circuitry: [here](https://moodle.rose-hulman.edu/plug
 ```
 * **Bluetooth Serial Monitor (HC05)**
 ```
-    - VCC                  5V   (bus)
+    - VCC:                 5V   (bus)
     - GND:                 GND  (bus)
     - RXD:                 P3.3 - 4 (TXD1)
     - TXD:                 P3.2 - 3 (RXD1)
+```
+* **Diagnostic LEDs**
+```
+    - Red (bit 0):         P6.4 - 10
+    - Green (bit 1):       P1.5 - 7        
+    - Blue (bit 2):        P4.4 - 26
+    - Yellow (bit 3):      P4.1 - 5
 ```

@@ -32,3 +32,7 @@ pin wiring of the internal circuitry: [here](https://moodle.rose-hulman.edu/plug
     - Blue (bit 2):        P4.4 - 26
     - Yellow (bit 3):      P4.1 - 5
 ```
+* **Other**
+```
+    - Calibrate Button:    P6.5 - 9
+```

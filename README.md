@@ -18,6 +18,11 @@ pin wiring of the internal circuitry: [here](https://moodle.rose-hulman.edu/plug
     - R:                   3.3V (bus)
     - Y:                   P5.1 - 33
 ```
+* **IR Transmitter**
+```
+    - GND:                 220Ω to GND (bus)
+    - Signal In:           P6.6 - 36
+``` 
 * **Bluetooth Serial Monitor (HC05)**
 ```
     - VCC:                 5V   (bus)
@@ -31,8 +36,22 @@ pin wiring of the internal circuitry: [here](https://moodle.rose-hulman.edu/plug
     - Green (bit 1):       P1.5 - 7        
     - Blue (bit 2):        P4.4 - 26
     - Yellow (bit 3):      P4.1 - 5
+    - GND (for all):       220Ω to GND (bus)
 ```
-* **Other**
+* **Setup Button**
 ```
-    - Calibrate Button:    P6.5 - 9
+    - Signal Out:          P6.5 - 9
+    - GND:                 GND (bus)
+```
+* **IR Distance Finder**
+```
+    - GND:                 GND  (bus)
+    - VCC:                 5V (bus)
+    - Signal:              P6.1 - 23
+```
+* **Light Sensor (Photo Resistor)**
+```
+    - Pin1:                3.3V (bus)
+    - Pin2:                Resistor & P6.3 - 63
+    - Resistor (220Ω):     GND (bus)
 ```

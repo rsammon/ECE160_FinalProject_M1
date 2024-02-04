@@ -13,16 +13,7 @@
   Last revised: 1/30/24
 
 ***** Hardware Connections: *****
-     start button       P3.0
-     playstation connections
-     brown wire         P1.7 
-     orange wire        P1.6 
-     yellow wire        P2.3
-     blue wire          P6.7
-
-     IR LED             P
-     Light Sensor       P
-     Gripper Servo      P
+      [VIEW README.md]
 */
 
 // Load libraries used
@@ -416,6 +407,7 @@ void setupDiagnosticLEDs(){
     Serial1.print("In Auto Mode. Distance: ");
     distIN = readSharpDistIN(SensorPos);
     Serial1.print(distIN);
+    if(distIN == -1) distIN = 2147483648;
     switch (AutoState) {
       case START_IN_TUNNEL:
         Serial1.println(" | In start tunnel state.");

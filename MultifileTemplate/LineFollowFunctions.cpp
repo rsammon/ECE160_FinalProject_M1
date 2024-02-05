@@ -13,16 +13,13 @@
 
   Created by: Rowan Sammon
   Created: 01/16/2024
-  Last modified: 02/03/2024
+  Last modified: 02/05/2024
   Version: 1.0
 */ 
 
 #include <SimpleRSLK.h>
 #include "LineFollowFunctions.h"
 
-#define MIDDLE_ON_LINE 4500
-#define LEFT_ON_LINE 1000
-#define RIGHT_ON_LINE 8000
 
 const uint16_t normalSpeed = 10;
 const uint16_t fastSpeed = 20;
@@ -47,15 +44,28 @@ void moveForwardOnLine(){
         setMotorSpeed(RIGHT_MOTOR, normalSpeed);
     }
 
-/*
-    //robot is on left side of line
-    if(LEFT_ON_LINE>=linePos && linePos<MIDDLE_ON_LINE){
-        SLIGHTLY_OVER_MOTOR_SPEED = SLIGHTLY_OVER_OFFSET*(MIDDLE_ON_LINE-linePos)/(MIDDLE_ON_LINE-LEFT_ON_LINE);
-        moveRL(SLIGHTLY_OVER_MOTOR_SPEED, MOTOR_LINE_FOLLOW_SPEED);
-    }
-    else if(LEFT_ON_LINE>=linePos && linePos<MIDDLE_ON_LINE){ //right side
-        SLIGHTLY_OVER_MOTOR_SPEED = SLIGHTLY_OVER_MOTOR_SPEED*(MIDDLE_ON_LINE-linePos)/(MIDDLE_ON_LINE-LEFT_ON_LINE);
-        moveRL(SLIGHTLY_OVER_MOTOR_SPEED, MOTOR_LINE_FOLLOW_SPEED);
-    }
+}
+
+#define LINE_TO_LEFT -1
+#define LINE_TO_RIGHT 1
+
+/**
+ * @returns -1 if line to the left, 0 if in center, 1 if on right
 */
+int lineTurning(){
+    uint16_t sensorArray[8];
+    // uint16_t* sensors = sensorArray;
+    readCalLineSensor(sensorArray);
+    boolean under = true;
+    for(int i =0; i< (sizeof(sensorArray)/sizeof(sensorArray[0]))/2; i++){
+        if(sensorArray[i] < 500) under = false;
+    }
+    if(under) return -1;
+
+    under = true;
+    for(int i =(sizeof(sensorArray)/sizeof(sensorArray[0]))/2; i< (sizeof(sensorArray)/sizeof(sensorArray[0])); i++){
+        if(sensorArray[i] < 500) under = false;
+    }
+    if(under) return 1;
+    return 0;
 }

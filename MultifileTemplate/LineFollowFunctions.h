@@ -11,3 +11,4 @@ Initialize any functions & variables that exist in LineFollowFunction.cpp here.
 
 void calibrateLineFollow();
 void moveForwardOnLine();
+int lineTurning();

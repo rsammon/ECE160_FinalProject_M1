@@ -23,11 +23,12 @@ float distIN;
     // readSharpDist(1) is the center distance sensor which is tied to P6.1
     // readSharpDist(2) is the right distance sensor which is tied to P9.0
 
-uint8_t SensorPos = 1; // sets the sensor pin used
+uint8_t SensorPos = 2; // sets the sensor pin used
 
 void setup() {
 
   UART_SERIAL.begin(57600);
+  Serial1.begin(57600);
   UART_SERIAL.println("starting serial monitor-USB");
   setupRSLK();
 }
@@ -47,5 +48,11 @@ void loop() {
   UART_SERIAL.print(distMM, DEC);  UART_SERIAL.print(" mm | ");
   UART_SERIAL.print(distIN, DEC);  UART_SERIAL.print(" inches");
   UART_SERIAL.println();
+
+  Serial1.print("Distance measured: ");
+  Serial1.print(distValue, DEC);  Serial1.print(" raw value | ");
+  Serial1.print(distMM, DEC);  Serial1.print(" mm | ");
+  Serial1.print(distIN, DEC);  Serial1.print(" inches");
+  Serial1.println();
   delay(1000);
 }

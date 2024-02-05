@@ -25,7 +25,7 @@
 #include <TinyNEC.h>
 #include "TinyNECTX.h"
 #include "LineFollowFunctions.h"
-
+#include "SonarFunctions.h"
 
 //IR Setup
 #define STR_HELPER(x) #x
@@ -37,8 +37,8 @@ IRData IRmsg;
 
 int IRLEDpin = 36;
 IRsender irTX = IRsender(IRLEDpin);
-int SensorPos = 1;
-int lightSensor = 63;
+int SensorPos = 2;
+int lightSensor = A16;
 
 //Initialize Autonomous States
 const int START_IN_TUNNEL = 0;
@@ -48,7 +48,7 @@ const int TURN_IN_TUNNEL = 3;
 const int EXIT_TUNNEL = 4;
 const int LEAVE_TUNNEL = 5;
 const int IDLE = 6;
-int AutoState = LINE_FOLLOW;
+int AutoState = START_IN_TUNNEL;
 
 //Initialize AutoOrManual States
 const int MANUAL = 1;
@@ -104,6 +104,9 @@ unsigned long currentTime;
 unsigned long previousTime;
 const int INTERVAL = 300;
 double distIN;
+
+int brightLight;
+int darkLight;
 
 
 void setup() {
@@ -181,14 +184,26 @@ void setup() {
     
   }
 
-//while(Serial1.available() <=0);
-while(digitalRead(START_BUTTON_PIN) == LOW);
+Serial1.println("press button to calibrate line follow & light sensor to bright light");
+waitUntilButtonRelease(START_BUTTON_PIN);
 //implement a method to allow calibration after button is pressed
-  calibrateLineFollow();
-  Serial1.println("[Done] Calibration finished");
-  //throw away first readings on the controller (seem to be wrong)  
-  ps2x.Analog(PSS_LY);
-  ps2x.Analog(PSS_RY);
+calibrateLineFollow();
+brightLight = getAverageLight(lightSensor);
+Serial1.print("Bright light is ");
+Serial1.println(brightLight);
+Serial1.println("[Done] Calibration finished");
+Serial1.println("press button to calibrate to dark light");
+
+waitUntilButtonRelease(START_BUTTON_PIN);
+darkLight = getAverageLight(lightSensor);
+Serial1.print("Dark light is ");
+Serial1.println(darkLight);
+Serial1.println("[Done] Calibration finished");
+
+
+//throw away first readings on the controller (seem to be wrong)  
+ps2x.read_gamepad();
+disableMotor(BOTH_MOTORS);
 }
 
 void loop() {
@@ -208,6 +223,27 @@ void loop() {
 
 
   updateDiagnosticLEDs();
+  delay(50);
+}
+
+/**
+ * Get the average light in the current lighting conditions recorded by the light sensor. used in calibrating the light sensor.
+ * @param int sensorPin - the pin the light sensor is connected to
+*/
+int getAverageLight(int sensorPin, int trials){
+  int sum = 0;
+    for(int i = 0; i < trials; i++){
+      sum+=analogRead(sensorPin);
+    }
+    return sum/trials;
+}
+int getAverageLight(int sensorPin){
+  int sum = 0;
+   int trials = 50;
+    for(int i = 0; i < trials; i++){
+      sum+=analogRead(sensorPin);
+    }
+    return sum/trials;
 }
 
 /** Updates the diagnosticLEDPins based on the Autonomous state
@@ -229,6 +265,15 @@ void setupDiagnosticLEDs(){
   for(int i = 0; i < sizeof(diagnosticLEDPins)/4; i++){
       pinMode(diagnosticLEDPins[i], OUTPUT);
   }
+}
+
+/**
+ * Waits until the button is pressed & released to proceed with the code
+ * @param int buttonPin - the pin of the button (set to INPUT_PULLDOWN) to wait for
+*/
+void waitUntilButtonRelease(int buttonPin){
+while(digitalRead(buttonPin) == LOW);
+while(digitalRead(buttonPin) == HIGH);
 }
 
   /* RemoteControlPlaystation() function
@@ -334,7 +379,7 @@ void setupDiagnosticLEDs(){
         irRX.decodeIR(&IRresults);
         irTX.write(&IRresults);
         Serial1.print('.');
-        //delay(100);
+        delay(100);
       }
       else{
         digitalWrite(IRLEDpin, LOW);
@@ -405,13 +450,16 @@ void setupDiagnosticLEDs(){
   */
   void AutonomousMode(){
     Serial1.print("In Auto Mode. Distance: ");
-    distIN = readSharpDistIN(SensorPos);
+    distIN = getAverageDistanceIR(SensorPos, 10);
     Serial1.print(distIN);
-    if(distIN == -1) distIN = 2147483648;
+    const int LIGHT_TOLERANCE = 50;
+    const int RIGHT_SONAR_FAR = 70;
+    int lightValue;
     switch (AutoState) {
       case START_IN_TUNNEL:
         Serial1.println(" | In start tunnel state.");
-        moveRL(30, 30);
+        if(rightSonarCM() < RIGHT_SONAR_FAR) centerRobotSonarForward();
+        else moveRL(30, 30);
         if (distIN<5){
           AutoState = TURN_IN_TUNNEL;
         }
@@ -425,8 +473,11 @@ void setupDiagnosticLEDs(){
         break;
       case EXIT_TUNNEL:
         Serial1.println(" | In exit tunnel state.");
-        moveRL(30,30);
-        if (analogRead(lightSensor)>2000){
+        if(rightSonarCM() < RIGHT_SONAR_FAR) centerRobotSonarForward();
+        else moveRL(30, 30);
+        lightValue = getAverageLight(lightSensor, 50);
+        Serial1.println(lightValue);
+        if (lightValue>(darkLight+LIGHT_TOLERANCE)){
           AutoState = LEAVE_TUNNEL;
           previousTime = currentTime;
         }
@@ -448,7 +499,7 @@ void setupDiagnosticLEDs(){
         AutoState = IDLE;
         break;
       case LEAVE_TUNNEL:
-        moveRL(15, 15);
+        centerRobotSonarForward();
         if (currentTime-previousTime>INTERVAL){
           AutoState=LINE_FOLLOW;
         }
@@ -458,3 +509,18 @@ void setupDiagnosticLEDs(){
       break;
     }
   }
+
+/**
+ * Get the average distance measured by the IR sensor
+ * @param int sensorPosition - the position of the IR sensor
+*/
+double getAverageDistanceIR(int sensorPosition, double trials){
+  double sum = 0;
+  double data;
+    for(int i = 0; i < trials; i++){
+      data = readSharpDistIN(sensorPosition);
+      if(data == -1) data = 31.0;
+      sum+=data;
+    }
+    return sum/trials;
+}

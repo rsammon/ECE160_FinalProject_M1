@@ -25,5 +25,8 @@ void setup(){
 void loop(){
     moveForwardOnLine();
     Serial1.print("value of sensor: "); 
-    Serial1.println(getLinePosition());
+    Serial1.print(getLinePosition());
+    Serial.print(" line direction ");
+    Serial1.println(lineTurning());
+    delay(100);
 }

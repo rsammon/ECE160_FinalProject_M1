@@ -93,9 +93,10 @@ void spinRight(int speed){
     setMotorSpeed(BOTH_MOTORS, speed);
 }
 
-/*moves the robot forward at the specified right and left speeds*/
-//@param leftSpeed: the speed from -100 to 100 percent (negative is backward, positive is forward) to move the left motor
-//@param rightSpeed: the speed from -100 to 100 percent (negative is backward, positive is forward) to move the right motor
+/** moves the robot forward at the specified right and left speeds
+* @param leftSpeed: the speed from -100 to 100 percent (negative is backward, positive is forward) to move the left motor
+* @param rightSpeed: the speed from -100 to 100 percent (negative is backward, positive is forward) to move the right motor
+*/
 void moveRL(int leftSpeed, int rightSpeed){
     //parameter validity checks
     if(leftSpeed > 100) leftSpeed = 100;
@@ -124,12 +125,12 @@ void moveRL(int leftSpeed, int rightSpeed){
 }
 
 
-
+int closedPos = 75;
 //@param int initialPos: starting position, should be 80 or 0.
 int useGripper(int initialPos, Servo myServo){
   int pos;
   if (initialPos == 0){
-    pos = 80;
+    pos = closedPos;
     myServo.write(pos); 
   }
   else {

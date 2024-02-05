@@ -3,7 +3,7 @@ Code of Team Theta/Octopi for the ECE160 Final Group Project. Main code is found
 
 ## Circuit wiring for code:
 pin wiring of the internal circuitry: [here](https://moodle.rose-hulman.edu/pluginfile.php/5035015/mod_resource/content/2/msp432p4xx_1pg_pin_map.pdf)
-* **PS2 controller wireless reciever**
+* **PS2 controller wireless receiver**
 ```
     - power (red):         3.3V (bus)
     - ground (black):      GND  (bus)
@@ -47,11 +47,23 @@ pin wiring of the internal circuitry: [here](https://moodle.rose-hulman.edu/plug
 ```
     - GND:                 GND  (bus)
     - VCC:                 5V (bus)
-    - Signal:              P6.1 - 23
+    - Signal:              P9.0 - A17
 ```
 * **Light Sensor (Photo Resistor)**
 ```
     - Pin1:                3.3V (bus)
-    - Pin2:                Resistor & P6.3 - 63
+    - Pin2:                Resistor & P9.1 - A16
     - Resistor (220Ω):     GND (bus)
+```
+* **Left Sonar**
+```
+    - VCC:                 5V (bus)
+    - Trig:                P9.3 - 62
+    - GND:                 GND (bus)
+```
+* **Right Sonar**
+```
+    - VCC:                 5V (bus)
+    - Trig:                P6.3 - 63
+    - GND:                 GND (bus)
 ```

@@ -10,5 +10,8 @@ Initialize any functions & variables that exist in LineFollowFunction.cpp here.
 #include "MotorFunctions.h"
 
 void calibrateLineFollow();
-void moveForwardOnLine();
+void moveForwardOnLine(boolean turnOnLine = false);
 int lineTurning();
+boolean lineRight();
+boolean lineLeft();
+int lineTurningStartDetection();

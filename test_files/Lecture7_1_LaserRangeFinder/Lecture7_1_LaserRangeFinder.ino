@@ -23,7 +23,7 @@ float distIN;
     // readSharpDist(1) is the center distance sensor which is tied to P6.1
     // readSharpDist(2) is the right distance sensor which is tied to P9.0
 
-uint8_t SensorPos = 2; // sets the sensor pin used
+uint8_t SensorPos = 0; // sets the sensor pin used
 
 void setup() {
 

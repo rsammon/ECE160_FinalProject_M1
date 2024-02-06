@@ -369,8 +369,9 @@ while(digitalRead(buttonPin) == HIGH);
         if(irTX.write(&IRmsg)==1){
          Serial1.print(" | Transmitting:");
          Serial1.println(IRmsg.command);
+         delay(100);
         }
-
+        
         
       }
       else if(ps2x.Button(PSB_PAD_DOWN)){
@@ -450,7 +451,7 @@ while(digitalRead(buttonPin) == HIGH);
   */
   void AutonomousMode(){
     Serial1.print("In Auto Mode. Distance: ");
-    distIN = getAverageDistanceIR(SensorPos, 10);
+    distIN = centerSonarIN();
     Serial1.print(distIN);
     const int LIGHT_TOLERANCE = 50;
     const int RIGHT_SONAR_FAR = 70;
@@ -519,7 +520,7 @@ double getAverageDistanceIR(int sensorPosition, double trials){
   double data;
     for(int i = 0; i < trials; i++){
       data = readSharpDistIN(sensorPosition);
-      if(data == -1) data = 31.0;
+      if(data == -1) data = 31.0; 
       sum+=data;
     }
     return sum/trials;

@@ -61,6 +61,12 @@ pin wiring of the internal circuitry: [here](https://moodle.rose-hulman.edu/plug
     - Trig:                P9.3 - 62
     - GND:                 GND (bus)
 ```
+* **Center Sonar**
+```
+    - VCC:                 5V (bus)
+    - Trig:                P2.5 - 19
+    - GND:                 GND (bus)
+```
 * **Right Sonar**
 ```
     - VCC:                 5V (bus)

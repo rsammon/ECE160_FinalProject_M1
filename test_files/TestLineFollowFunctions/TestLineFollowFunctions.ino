@@ -4,7 +4,7 @@
 /*
 Author: Rowan Sammon
 Created: 1/16/2024
-Last modified: 02/03/2024
+Last modified: 02/05/2024
 purpose: verify proper functions of the LineFollowFunctions methods
 */
 
@@ -23,10 +23,10 @@ void setup(){
 }
 
 void loop(){
-    moveForwardOnLine();
+    moveForwardOnLine(true);
     Serial1.print("value of sensor: "); 
     Serial1.print(getLinePosition());
-    Serial.print(" line direction ");
+    Serial1.print(", line direction: ");
     Serial1.println(lineTurning());
-    delay(100);
+    
 }

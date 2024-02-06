@@ -9,6 +9,7 @@
 #include "SonarFunctions.h"
 extern NewPing rightSonar = NewPing(RIGHT_SONAR, RIGHT_SONAR, MAX_SONAR_DISTANCE);
 extern NewPing leftSonar =  NewPing(LEFT_SONAR, LEFT_SONAR, MAX_SONAR_DISTANCE); 
+extern NewPing centerSonar =  NewPing(CENTER_SONAR, CENTER_SONAR, MAX_SONAR_DISTANCE); 
 
 long findDifferenceBetweenSonars(){
     return leftSonar.ping_cm() - rightSonar.ping_cm();
@@ -18,6 +19,12 @@ long leftSonarCM(){
 }
 long rightSonarCM(){
   return rightSonar.ping_cm();
+}
+long centerSonarCM(){
+  return rightSonar.ping_cm();
+}
+long centerSonarIN(){
+  return centerSonar.ping_in();
 }
 
 void centerRobotSonarForward(){

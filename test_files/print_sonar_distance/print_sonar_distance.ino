@@ -13,13 +13,13 @@
 
 const int leftSonarPin =  62;
 const int rightSonarPin = 63;
-const int CENTER_SONAR = 66;
-const int CENTER_SONAR_ECHO = 37;
+const int CENTER_SONAR_TRIG = 70;
+const int CENTER_SONAR_ECHO = 71;
 const int MAX_DISTANCE = 200;
 
 NewPing leftSonar =  NewPing(leftSonarPin, leftSonarPin, MAX_DISTANCE); // Each sensor's trigger pin, echo pin, and max distance to ping. 
 NewPing rightSonar = NewPing(rightSonarPin, rightSonarPin, MAX_DISTANCE);
-NewPing centerSonar(CENTER_SONAR, CENTER_SONAR_ECHO, MAX_DISTANCE); 
+NewPing centerSonar = NewPing (CENTER_SONAR_TRIG, CENTER_SONAR_ECHO, MAX_DISTANCE); 
 
 void setup(){
     Serial1.begin(57600);

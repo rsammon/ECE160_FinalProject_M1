@@ -138,11 +138,7 @@ void setup() {
     else {
      Serial1.println("IR Transmitter failed to initialize.");
     }
-    //Set IRmsg to light gold votive
-    IRmsg.protocol = NEC;
-    IRmsg.address = 0xEE;
-    IRmsg.command = 160;
-    IRmsg.isRepeat = false;
+    
     Serial1.println("Setup complete.");
 
     while (error) {
@@ -364,22 +360,35 @@ while(digitalRead(buttonPin) == HIGH);
 
       //IR transmitter
       if(ps2x.Button(PSB_PAD_UP)){
-        
+        while(ps2x.Button(PSB_PAD_UP)){
+        //Set IRmsg to light gold votive
+        IRmsg.protocol = NEC;
+        IRmsg.address = 0xEE;
+        IRmsg.command = 160;
+        IRmsg.isRepeat = false;
         digitalWrite(LED_BUILTIN, HIGH);
-        if(irTX.write(&IRmsg)==1){
-         Serial1.print(" | Transmitting:");
-         Serial1.println(IRmsg.command);
+        irTX.write(&IRmsg);
+        Serial.print(".");
+        Serial1.print(" | Transmitting:");
+        Serial1.println(IRmsg.command);
         }
-
-        
       }
       else if(ps2x.Button(PSB_PAD_DOWN)){
         //recieve IR signal on address and retransmit it
         Serial1.println("Recieving and retransmitting...");
         irRX.decodeIR(&IRresults);
-        irTX.write(&IRresults);
-        Serial1.print('.');
-        delay(100);
+        IRmsg.protocol = NEC;
+        IRmsg.address = 0xCE;
+        IRmsg.command = IRresults.command;
+        IRmsg.isRepeat = false;
+        Serial.print(IRmsg.address);
+        Serial.print("//");
+        Serial.print(IRmsg.command);
+        Serial1.print(IRmsg.address);
+        Serial1.print("//");
+        Serial1.print(IRmsg.command);
+        irTX.write(&IRmsg);
+        delay(500);
       }
       else{
         digitalWrite(IRLEDpin, LOW);

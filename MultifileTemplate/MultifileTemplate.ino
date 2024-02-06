@@ -31,12 +31,12 @@
 #define STR_HELPER(x) #x
 #define STR(x) STR_HELPER(x)
 #define IR_RCV_PIN      33
+#define IR_TRX_PIN      36
 IRreceiver irRX(IR_RCV_PIN);
+IRsender irTX(IR_TRX_PIN);
 IRData IRresults;
 IRData IRmsg;
 
-int IRLEDpin = 36;
-IRsender irTX = IRsender(IRLEDpin);
 int SensorPos = 2;
 int lightSensor = A16;
 
@@ -138,6 +138,19 @@ void setup() {
     else {
      Serial1.println("IR Transmitter failed to initialize.");
     }
+        /*
+     * Must be called to initialize and set up IR receiver pin.
+     *  bool initIRReceiver(bool includeRepeats = true, bool enableCallback = false,
+                void (*callbackFunction)(uint16_t , uint8_t , bool) = NULL)
+     */
+    if (irRX.initIRReceiver()) {
+        Serial1.println(F("Ready to receive NEC IR signals at pin " STR(IR_RCV_PIN)));
+    } else {
+        Serial1.println("Initialization of IR receiver failed!");
+        while (1) {;}
+    }
+    // enable receive feedback and specify LED pin number (defaults to LED_BUILTIN)
+    enableRXLEDFeedback(BLUE_LED);
     
     Serial1.println("Setup complete.");
 
@@ -162,19 +175,7 @@ void setup() {
     Serial1.begin(57600);
     delay(500); // To be able to connect Serial1 monitor after reset or power up 
     Serial1.println(F("START " __FILE__ " from " __DATE__));
-    /*
-     * Must be called to initialize and set up IR receiver pin.
-     *  bool initIRReceiver(bool includeRepeats = true, bool enableCallback = false,
-                void (*callbackFunction)(uint16_t , uint8_t , bool) = NULL)
-     */
-    if (irRX.initIRReceiver()) {
-        Serial1.println(F("Ready to receive NEC IR signals at pin " STR(IR_RCV_PIN)));
-    } else {
-        Serial1.println("Initialization of IR receiver failed!");
-        while (1) {;}
-    }
-    // enable receive feedback and specify LED pin number (defaults to LED_BUILTIN)
-    enableRXLEDFeedback(BLUE_LED);
+
 
     
     
@@ -361,7 +362,7 @@ while(digitalRead(buttonPin) == HIGH);
       //IR transmitter
       if(ps2x.Button(PSB_PAD_UP)){
         while(ps2x.Button(PSB_PAD_UP)){
-        //Set IRmsg to light gold votive
+       //Set IRmsg to light gold votive
         IRmsg.protocol = NEC;
         IRmsg.address = 0xEE;
         IRmsg.command = 160;
@@ -371,12 +372,17 @@ while(digitalRead(buttonPin) == HIGH);
         Serial.print(".");
         Serial1.print(" | Transmitting:");
         Serial1.println(IRmsg.command);
+        ps2x.read_gamepad();
         }
+        
       }
-      else if(ps2x.Button(PSB_PAD_DOWN)){
+      if(ps2x.Button(PSB_PAD_DOWN)){
         //recieve IR signal on address and retransmit it
         Serial1.println("Recieving and retransmitting...");
-        irRX.decodeIR(&IRresults);
+        if(irRX.decodeIR(&IRresults)){
+          IRresults.command;
+          delay(100);
+        }
         IRmsg.protocol = NEC;
         IRmsg.address = 0xCE;
         IRmsg.command = IRresults.command;
@@ -391,7 +397,7 @@ while(digitalRead(buttonPin) == HIGH);
         delay(500);
       }
       else{
-        digitalWrite(IRLEDpin, LOW);
+        digitalWrite(IR_TRX_PIN, LOW);
         digitalWrite(LED_BUILTIN, LOW);
       }
 

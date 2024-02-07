@@ -26,6 +26,7 @@
 #include "TinyNECTX.h"
 #include "LineFollowFunctions.h"
 #include "SonarFunctions.h"
+#include <Ultrasonic.h>
 
 //IR Setup
 #define STR_HELPER(x) #x
@@ -79,6 +80,11 @@ Servo myServo;
 const int SERVO_PIN = 38;
 
 
+//front sonar sensor
+const int trigPin = 71;
+const int echoPin = 70;
+Ultrasonic mySonar(trigPin, echoPin);
+
 // Define remote mode either playstation controller or IR remote controller
 enum RemoteMode {
   PLAYSTATION,
@@ -113,6 +119,8 @@ int darkLight;
 
 void setup() {
   Serial1.begin(57600);
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT);
   Serial1.print("Starting up Robot code...... ");
 
   // Run setup code
@@ -491,21 +499,21 @@ void AutonomousMode() {
       Serial1.println(" | In start tunnel state.");
       if (rightSonarCM() < RIGHT_SONAR_FAR) centerRobotSonarForward();
       else moveRL(30, 30);
-      if (distIN < 5) {
+      if (mySonar.read(CM) < 20) {
         AutoState = TURN_IN_TUNNEL;
       }
       break;
     case TURN_IN_TUNNEL:
       Serial1.println(" | In turning tunnel state.");
-      moveRL(15, -15);
-      if (distIN > 20) {
+      moveRL(30, -30);
+      if (mySonar.read(CM) > 100) {
         AutoState = EXIT_TUNNEL;
       }
       break;
     case EXIT_TUNNEL:
       Serial1.println(" | In exit tunnel state.");
       if (rightSonarCM() < RIGHT_SONAR_FAR) centerRobotSonarForward();
-      else moveRL(30, 30);
+      else moveRL(15, 15);
       lightValue = getAverageLight(lightSensor, 50);
       Serial1.println(lightValue);
       if (lightValue > (darkLight + LIGHT_TOLERANCE)) {
@@ -518,7 +526,7 @@ void AutonomousMode() {
       moveForwardOnLine();
       Serial1.print(" Pos: ");
       Serial1.println(getLinePosition());
-      if (distIN < 10) {
+      if (mySonar.read(CM) < 40) {
         AutoState = DROP_PAYLOAD;
       }
       break;

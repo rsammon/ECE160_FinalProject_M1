@@ -125,7 +125,7 @@ void moveRL(int leftSpeed, int rightSpeed){
 }
 
 
-int closedPos = 75;
+int closedPos = 80;
 //@param int initialPos: starting position, should be 80 or 0.
 int useGripper(int initialPos, Servo myServo){
   int pos;

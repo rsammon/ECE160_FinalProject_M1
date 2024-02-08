@@ -116,11 +116,21 @@ double distIN;
 int brightLight;
 int darkLight;
 
+//Color display variables and pins
+int red, green, blue;
+int colorSpeed = 500;
+#define R 1//insert real analog pins here
+#define G 1
+#define B 1
+
 
 void setup() {
   Serial1.begin(57600);
   pinMode(trigPin, OUTPUT);
   pinMode(echoPin, INPUT);
+  pinMode(R, OUTPUT);
+  pinMode(G, OUTPUT);
+  pinMode(B, OUTPUT);
   Serial1.print("Starting up Robot code...... ");
 
   // Run setup code
@@ -494,6 +504,15 @@ void AutonomousMode() {
   const int LIGHT_TOLERANCE = 50;
   const int RIGHT_SONAR_FAR = 70;
   int lightValue;
+
+  red = 128*sin(currentTime*PI/colorSpeed)+127;
+  green = 128*sin((currentTime*PI/colorSpeed)-(2*PI/3))+127;
+  blue = 128*sin((currentTime*PI/colorSpeed)-(4*PI/3))+127;
+  analogWrite(R, red);
+  analogWrite(G, green);
+  analogWrite(B, blue);
+
+
   switch (AutoState) {
     case START_IN_TUNNEL:
       Serial1.println(" | In start tunnel state.");

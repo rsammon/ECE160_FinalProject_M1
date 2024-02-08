@@ -119,9 +119,9 @@ int darkLight;
 //Color display variables and pins
 int red, green, blue;
 int colorSpeed = 500;
-#define R 1//insert real analog pins here
-#define G 1
-#define B 1
+#define R 11
+#define G 32
+#define B 31
 
 
 void setup() {
@@ -198,7 +198,6 @@ void setup() {
         Serial1.println("Controller refusing to enter Pressures mode, may not support it. ");
       delayMicroseconds(1000 * 1000);
     }
-    delay(5000);
   }
 
   else if (CurrentRemoteMode == 1) {

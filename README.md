@@ -43,12 +43,6 @@ pin wiring of the internal circuitry: [here](https://moodle.rose-hulman.edu/plug
     - Signal Out:          P6.5 - 9
     - GND:                 GND (bus)
 ```
-* **IR Distance Finder**
-```
-    - GND:                 GND  (bus)
-    - VCC:                 5V (bus)
-    - Signal:              P9.0 - A17
-```
 * **Light Sensor (Photo Resistor)**
 ```
     - Pin1:                3.3V (bus)
@@ -65,5 +59,12 @@ pin wiring of the internal circuitry: [here](https://moodle.rose-hulman.edu/plug
 ```
     - VCC:                 5V (bus)
     - Trig:                P6.3 - 63
+    - GND:                 GND (bus)
+```
+* **Middle Sonar**
+```
+    - VCC:                 5V (bus)
+    - Trig:                P10.3
+    - Echo:		   P10.1
     - GND:                 GND (bus)
 ```

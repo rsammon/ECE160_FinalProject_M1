@@ -1,16 +1,28 @@
 /*
   Final project code for ECE 160
   Based on multifile template
-  Program can use a playstation controller or IR remote to direct a robot
+  The program has the abiltity to control the robot in the way that we want for the competition. This includes controls for
+  both the IR controller and the playstation remote, both of which can control the robot, it terms of movement and grabbing block.
+  We also have the ability for the robot to go into an autonomous mode that will drive through a tunnel without a line and 
+  turn in said tunnel, and exit the tunnel, where it will then find and follow the line before getting close enough to the final wall, 
+  where it will turn and drop the ball in the graveyard.
+
+  We create function for each of the manual mode, IR remote control mode, Playstation remote control mode, and autonomous mode. We also created
+  functions for the diagnostic LEDs and to find the average distance of the front sensor. Most of the variables created in the file are for 
+  pin located and state values that are used in a couple state machine. Other variables include create objects, like PS2X and Servo, speed setting,
+  and variables to read values, like Playstation stick values, and time values between specific actions.
 
   Calls functions in files:
-  MotorFunctions.ino
   MotorFunctions.cpp
   LineFollowFunctions.cpp
+  SonarFunctions.cpp
+  MotorFunctions.h
+  LineFollowFunctions.h
+  SonarFunctions.h
 
   written for the MSP432401 board
   Author: Deborah Walter, Rowan Sammon, Wyatt Ronn, and Eric Steuber
-  Last revised: 1/30/24
+  Last revised: 2/8/24
 
 ***** Hardware Connections: *****
       [VIEW README.md]
